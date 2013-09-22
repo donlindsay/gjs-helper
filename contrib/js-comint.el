@@ -89,8 +89,7 @@
 If there is a process already running in `*js*', switch to that buffer.
 With argument, allows you to edit the command line (default is value
 of `inferior-js-program-command').
-Runs the hook `inferior-js-mode-hook' \(after the `comint-mode-hook'
-is run).
+Runs the hook `inferior-js-mode-hook' \(after the `comint-mode-hook' is run).
 \(Type \\[describe-mode] in the process buffer for a list of commands.)"
 
   (interactive (list (if current-prefix-arg

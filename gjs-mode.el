@@ -28,8 +28,7 @@
 ;; Boston, MA 02110-1301, USA
 
 ;; Description:
-;; A major mode for working with gjs, a javascript shell with gtk+
-;; bindings.
+;; A mode for working with gjs, a javascript shell with gtk+ bindings.
 
 ;; Compatibility:
 
