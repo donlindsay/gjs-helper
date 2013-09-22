@@ -51,8 +51,22 @@
 
 ;; js-comint
 ;; gjs-mode requires js-comint as a dependency
-;; he we require js-comint and set the
+;; here we require js-comint and set the
 ;; inferior-js-program-command to gjs
 (require 'js-comint)
+
+
+; bpalmer: "so, your mode should define-derived-mode, and probably use
+; a separate variable, and maybe do a (set (make-local-variable 'foo)
+; gjs-inferior-js-program) so that it's a self-contained thing" 
+
+; so not this, (setq inferior-js-program-command "gjs"), but this:
+(setq gjs-inferior-js-program "/usr/bin/gjs") 
+(define-derived-mode gjs-mode 
+  js-comint "GJS"
+  "Major mode for gjs javascript shell\\{js-comint-map}"
+  (set (make-local-variable 'inferior-js-program-command)
+       gjs-inferior-js-program))
+
+
 (provide 'gjs-mode)
-(setq inferior-js-program-command "gjs")
