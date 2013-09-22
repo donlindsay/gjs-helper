@@ -14,7 +14,7 @@
 ;; gjs-mode.el is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 2, or
-;; {at your option} any later version.
+;; (at your option) any later version.
 
 ;; gjs-mode.el is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -34,5 +34,25 @@
 ;; Compatibility:
 
 ;;; Code:
-(require 'js2-mode)
+
+;; js2-mode gjs-mode requires js2-mode as a dependency Here we require
+;; js2-mode and load the keybindings. If you have js2-mode via melpa,
+;; then the next line must be commented out.
+;(require 'js2-mode)
+;; add this to your .emacs
+;(add-hook 'js2-mode-hook 
+;	  '(lambda () 
+;	     (local-set-key "\C-x\C-e" 'js-send-last-sexp)
+;	     (local-set-key "\C-\M-x" 'js-send-last-sexp-and-go)
+;	     (local-set-key "\C-cb" 'js-send-buffer)
+;	     (local-set-key "\C-c\C-b" 'js-send-buffer-and-go)
+;	     (local-set-key "\C-cl" 'js-load-file-and-go)
+;	     ))
+
+;; js-comint
+;; gjs-mode requires js-comint as a dependency
+;; he we require js-comint and set the
+;; inferior-js-program-command to gjs
 (require 'js-comint)
+(provide 'gjs-mode)
+(setq inferior-js-program-command "gjs")
