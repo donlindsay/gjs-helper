@@ -1,17 +1,17 @@
 ; -*- Mode: emacs-lisp; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- 
-;;; gjs-mode.el ---
-
+;;; gjs-mode.el --- A gjs mode for working with gjs and gtk+ templates.
+;;;
 ;;; Copyright (C) 2013 Donald Lindsay
-     
+;;;     
 ;;; Author:           Donald Lindsay <don.lindsay@gmail.com>
 ;;; Maintainer:       Donald Lindsay <don.lindsay@gmail.com>
 ;;; Created:          21 September 2013
 ;;; Version:          0.0.1
 ;;; Package-Requires: (js2-mode, js-comint, gjs)
 ;;; Keywords:         javascript, inferior-mode, gtk+, gjs
-
+;;
 ;; This file is *not* part of GNU Emacs
-
+;;
 ;; gjs-mode is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 2, or
@@ -19,40 +19,91 @@
 ;; gjs-mode is distributed in the hope that it will be useful, but
 ;; WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-;; General Public License for more details.
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING, or type `C-h C-c'. If
-;; not, write to the Free Software Foundation at this address:
-;; Free Software Foundation, 51 Franklin Street, Fifth Floor
-;; Boston, MA 02110-1301, USA
+;; General Public License for more details. (type 'C-h C-c')
 ;;
-;; Description:
-;; A mode for working with gjs, a javascript shell with gtk+ bindings.
+;; Description: A mode for working with gjs, a javascript shell with
+;; gtk+ bindings.
 ;;
-;; Compatibility:
-;; Targeted for Emacs 24
+;; Compatibility: Targeted for Emacs 24
 ;;
-;; Dependencies: js2-mode js-comint gjs
+;; Dependencies:  js2-mode js-comint gjs
+;; 
+;; Code:
 
 ;(require 'js2-mode) ;uncomment this if you aren't using (m)elpa
 (require 'cl)
 (require 'js-comint)
 
-; bpalmer: "so, your mode should define-derived-mode, and probably use
-; a separate variable, and maybe do a (set (make-local-variable 'foo)
-; gjs-inferior-js-program) so that it's a self-contained thing" 
-
-; so not this, 
-;(setq inferior-js-program-command "gjs")
-; but this:
 (setq gjs-inferior-js-program "/usr/bin/gjs") 
+
 (define-derived-mode gjs-mode 
-  js-comint "GJS"
+  js-comint "*gjs-repl*"
   "A mode for the gjs javascript shell\\{js-comint-map}"
   (set (make-local-variable 'inferior-js-program-command)
        gjs-inferior-js-program))
 
+;; gjs-repl
+
+; This section for setting up, creating the gjs-repl window, and
+; starting the gjs shell. These tasks are currently being performed by
+; js-comint.
+
+; make-comint-in-buffer 
+; gjs-inferior-js-program
+; get-buffer
+; get-buffer-create
+; copy-to-buffer
+; process-adaptive-read-buffering
+; process-kill-buffer-query-function
+
+;; window scheme
+
+; A window scheme is necessary and customizable. Although there are
+; limitless ways of arranging windows, there are basically 2 main
+; types of window to support, each with it's preferred species of
+; buffer:
+;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
+;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
+; During the 'merge' operation, one of the windows can show an 'merge'
+; buffer that can be edited before the 'final' gjs-app-script buffer
+; is displayed in the top window. Ergo, the user can:
+;      1. Just work with a source file and a repl. 
+;      2. Generate a default gjs-app-script and use it with a repl. 
+;      3. 'Merge' a source file with a template, edit the 'merge', and use
+;         the product gjs-app-script with a repl.
+
+; ido-display-buffer
+; ido-insert-buffer
+; ido-read-buffer
+; ido-switch-buffer
+; ido-switch-buffer-other-window
+; pop-to-buffer-same-window
+; display-message-or-buffer
+; set-buffer
+; set-window-buffer
+; window-buffer
+; show-buffer
+
+; display-buffer
+; display-buffer-fallback-action
+; display-buffer-function
+; display-buffer-pop-up-window
+; display-buffer-same-window
+; pop-to-buffer
+
+;; minibuffer
+
+; A recursive minibuffer can be used to make selections of templates,
+; options, etc., thus reducing some of the window handling overhead.
+
+; window-minibuffer-p
+; enable-recursive-minibuffers
+; eval-minibuffer
+; file-cache-minibuffer-complete
+; exit-minibuffer
+
 ;; gjs-app-template
+
 ; The gjs-app-template will be combined with a javascript source file
 ; to produce the gjs-app-script.
 
@@ -77,12 +128,11 @@
 
 (add-template (make-gjs-app-template))
 
-; These are the basic templates and their options. The options
-; determine which code blocks will be included, and if so, what they
-; will contain. The basic templates are: native-gtk, webkit-gtk,
-; library, simple-webapp, cinnamon, unity and mate. The last three
-; templates are mainly so that appropriate imports will be included in
-; the gjs-app-script.
+; The basic templates are: native-gtk, webkit-gtk, library,
+; simple-webapp, cinnamon, unity and mate. The last three are mainly
+; for including/excluding appropriate imports. The options determine
+; which code blocks will be included, and if so, what they will
+; contain.
 
 (add-template (make-gjs-app-template
 	       :gjs-app-template-name 'native-gtk
@@ -142,7 +192,7 @@
 	       :gjs-effect            'default
 	       :gjs-image             'default
 	       :gjs-label             'default
-               :gjs-webview           'true))
+           :gjs-webview           'true))
 
 (add-template (make-gjs-app-template
 	       :gjs-app-template-name 'cinnamon
@@ -157,7 +207,7 @@
 	       :gjs-effect            'default
 	       :gjs-image             'default
 	       :gjs-label             'default
-               :gjs-webview           'default))
+           :gjs-webview           'default))
 
 (add-template (make-gjs-app-template
 	       :gjs-app-template-name 'mate
@@ -172,7 +222,7 @@
 	       :gjs-effect            'default
 	       :gjs-image             'default
 	       :gjs-label             'default
-               :gjs-webview           'default))
+           :gjs-webview           'default))
 
 (add-template (make-gjs-app-template
 	       :gjs-app-template-name 'unity
@@ -187,12 +237,38 @@
 	       :gjs-effect            'default
 	       :gjs-image             'default
 	       :gjs-label             'default
-               :gjs-webview           'default))
+           :gjs-webview           'default))
+
+;;; Hammer Time
 
 ;; gjs-template-engine
-; The gjs-template-engine takes the list of template variables above
-; and combines them with the selected template to create a
-; gjs-app-script.
+
+; The gjs-template-engine takes the list of templates and options and
+; combines them with the selected template to create a gjs-app-script.
+
+; make-indirect-buffer
+; clone-indirect-buffer-other-window
+
+; make-variable-buffer-local
+
+; custom-buffer-create
+; custom-buffer-create-other-window
+
+; buffer-string
+; buffer-substring
+; buffer-substring-filters
+; buffer-substring-no-properties
+
+; filter-buffer-substring
+; filter-buffer-substring-functions
+
+; ediff-merge-buffers
+; ediff-merge-buffers-with-ancestor
+
+; emerge-buffers
+; emerge-buffers-with-ancestor
+; view-buffer-other-window
+; highlight-compare-buffers
 
 ; gjsImports
 ; gjsApplicationName
@@ -208,10 +284,20 @@
 ; gjsWebview
 
 ;; gjs-app-script
-; The gjs-app-script is the runnable script produced by
-; gjs-template-engine. It opens in it's own buffer and the user can
-; save, load, run or edit.
+; The gjs-app-script is javascript produced by gjs-template-engine. It
+; opens in it's own buffer and the user can save, load, run or edit.
 
-
+; generate-new-buffer
+; generate-new-buffer-name
+; bury-buffer
+; switch-to-buffer
+; with-current-buffer
+; pp-buffer
+; set-buffer-major-mode
+; checkdoc-current-buffer
+; executable-make-buffer-file-executable-if-script-p
+; revert-buffer
+; switch-to-buffer-other-window
+; buffer-offer-save
 
 (provide 'gjs-mode)
