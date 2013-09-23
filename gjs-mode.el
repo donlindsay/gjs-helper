@@ -33,9 +33,9 @@
 ;; Targeted for Emacs 24
 ;;
 ;; Dependencies: js2-mode js-comint gjs
-;; js2-mode js-comint gjs
 
-;(require 'js2-mode) ;uncomment this if you aren't using melpa
+;(require 'js2-mode) ;uncomment this if you aren't using (m)elpa
+(require 'cl)
 (require 'js-comint)
 
 ; bpalmer: "so, your mode should define-derived-mode, and probably use
@@ -52,60 +52,166 @@
   (set (make-local-variable 'inferior-js-program-command)
        gjs-inferior-js-program))
 
-;; template system
-; The gjs templating system consists of the following subsystems that
-; act in a more or less linear way.
-
-;; gjs-app-param-form
-
-; The gjs-app-param-form is an emacs form that collects parameters
-; from the user to define the variables are passed to
-; gjs-template-engine for further processing. This form is similar to
-; a customize form and uses many of the same features.
-
 ;; gjs-app-template
+; The gjs-app-template will be combined with a javascript source file
+; to produce the gjs-app-script.
 
-; The gjs-app-template is the javascript template that will be
-; combined with the variables to produce the gjs-app-script. The
-; following is a basic list of templates.
+(defstruct gjs-app-template
+  gjs-app-template-name
+  gjs-imports
+  gjs-app-name
+  gjs-app-title
+  gjs-headerbar
+  gjs-tabs
+  gjs-grid
+  gjs-popover
+  gjs-style
+  gjs-effect
+  gjs-image
+  gjs-label
+  gjs-webview)
 
-; native-gtk
-; webkit-gtk
-; library
-; simple-webapp
-; cinnamon
-; unity
-; mate
+(defvar *gjs-app-templates* nil)
 
-;; gjs-app-template-variables
+(defun add-template (template) (push template *gjs-app-templates*))
 
-; This is a basic starter list of variables. The exact list of
-; variables depends upon the template used.
+(add-template (make-gjs-app-template))
+
+; These are the basic templates and their options. The options
+; determine which code blocks will be included, and if so, what they
+; will contain. The basic templates are: native-gtk, webkit-gtk,
+; library, simple-webapp, cinnamon, unity and mate. The last three
+; templates are mainly so that appropriate imports will be included in
+; the gjs-app-script.
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'native-gtk
+	       :gjs-imports           'default
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'app-title
+	       :gjs-headerbar         'default
+	       :gjs-tabs              'default
+	       :gjs-grid              'default
+	       :gjs-popover           'default
+	       :gjs-style             'default
+	       :gjs-effect            'default
+	       :gjs-image             'default
+	       :gjs-label             'default
+	       :gjs-webview           'false))
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'webkit-gtk
+	       :gjs-imports           'webkit-gtk
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'app-title
+	       :gjs-headerbar         'default
+	       :gjs-tabs              'default
+	       :gjs-grid              'default
+	       :gjs-popover           'default
+	       :gjs-style             'default
+	       :gjs-effect            'default
+	       :gjs-image             'default
+	       :gjs-label             'default
+	       :gjs-webview           'true))
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'library
+	       :gjs-imports           'library
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'false
+	       :gjs-headerbar         'false
+	       :gjs-tabs              'false
+	       :gjs-grid              'false
+	       :gjs-popover           'false
+	       :gjs-style             'false
+	       :gjs-effect            'false
+	       :gjs-image             'false
+	       :gjs-label             'false
+	       :gjs-webview           'false))
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'simple-webapp
+	       :gjs-imports           'default
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'app-title
+	       :gjs-headerbar         'true
+	       :gjs-tabs              'false
+	       :gjs-grid              'false
+	       :gjs-popover           'false
+	       :gjs-style             'default
+	       :gjs-effect            'default
+	       :gjs-image             'default
+	       :gjs-label             'default
+               :gjs-webview           'true))
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'cinnamon
+	       :gjs-imports           'cinnamon
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'app-title
+	       :gjs-headerbar         'true
+	       :gjs-tabs              'default
+	       :gjs-grid              'true
+	       :gjs-popover           'default
+	       :gjs-style             'default
+	       :gjs-effect            'default
+	       :gjs-image             'default
+	       :gjs-label             'default
+               :gjs-webview           'default))
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'mate
+	       :gjs-imports           'mate
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'app-title
+	       :gjs-headerbar         'false
+	       :gjs-tabs              'default
+	       :gjs-grid              'true
+	       :gjs-popover           'default
+	       :gjs-style             'default
+	       :gjs-effect            'default
+	       :gjs-image             'default
+	       :gjs-label             'default
+               :gjs-webview           'default))
+
+(add-template (make-gjs-app-template
+	       :gjs-app-template-name 'unity
+	       :gjs-imports           'unity
+	       :gjs-app-name          'app-name
+	       :gjs-app-title         'app-title
+	       :gjs-headerbar         'true
+	       :gjs-tabs              'default
+	       :gjs-grid              'true
+	       :gjs-popover           'default
+	       :gjs-style             'default
+	       :gjs-effect            'default
+	       :gjs-image             'default
+	       :gjs-label             'default
+               :gjs-webview           'default))
+
+;; gjs-template-engine
+; The gjs-template-engine takes the list of template variables above
+; and combines them with the selected template to create a
+; gjs-app-script.
 
 ; gjsImports
 ; gjsApplicationName
 ; gjsApplicationTitle
 ; gjsHeaderBar
-; gjsTab
+; gjsTabs
 ; gjsGrid
 ; gjsPopover
 ; gjsStyle
 ; gjsEffect
 ; gjsImage
 ; gjsLabel
-
-
-;; gjs-template-engine
-
-; The gjs-template-engine takes the list of template variables above
-; and combines them with the selected template to create a gjs-app-script
-; script and, perhaps, saves it, runs it, or opens it for further editing.
+; gjsWebview
 
 ;; gjs-app-script
-
 ; The gjs-app-script is the runnable script produced by
-; gjs-template-engine and can be called either at the command line or
-; loaded into the gjs shell with 'js-load-file-and-go
+; gjs-template-engine. It opens in it's own buffer and the user can
+; save, load, run or edit.
+
 
 
 (provide 'gjs-mode)
