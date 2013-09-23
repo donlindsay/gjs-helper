@@ -63,9 +63,64 @@
 (setq gjs-inferior-js-program "/usr/bin/gjs") 
 (define-derived-mode gjs-mode 
   js-comint "GJS"
-  "Major mode for gjs javascript shell\\{js-comint-map}"
+  "A mode for gjs javascript shell\\{js-comint-map}"
   (set (make-local-variable 'inferior-js-program-command)
        gjs-inferior-js-program))
+
+;; template system
+; The gjs templating system consists of the following subsystems that
+; act in a more or less linear way.
+
+;; gjs-app-param-form
+
+; The gjs-app-param-form is an emacs form that collects parameters
+; from the user to define the variables are passed to
+; gjs-template-engine for further processing. This form is similar to
+; a customize form and uses many of the same features.
+
+;; gjs-app-template
+
+; The gjs-app-template is the javascript template that will be
+; combined with the variables to produce the gjs-app-script. The
+; following is a basic list of templates.
+
+; native-gtk
+; webkit-gtk
+; library
+; simple-webapp
+; cinnamon
+; unity
+; mate
+
+;; gjs-app-template-variables
+
+; This is a basic starter list of variables. The exact list of
+; variables depends upon the template used.
+
+; gjsImports
+; gjsApplicationName
+; gjsApplicationTitle
+; gjsHeaderBar
+; gjsTab
+; gjsGrid
+; gjsPopover
+; gjsStyle
+; gjsEffect
+; gjsImage
+; gjsLabel
+
+
+;; gjs-template-engine
+
+; The gjs-template-engine takes the list of template variables above
+; and combines them with the selected template to create a gjs-app-script
+; script and, perhaps, saves it, runs it, or opens it for further editing.
+
+;; gjs-app-script
+
+; The gjs-app-script is the runnable script produced by
+; gjs-template-engine and can be called either at the command line or
+; loaded into the gjs shell with 'js-load-file-and-go
 
 
 (provide 'gjs-mode)
