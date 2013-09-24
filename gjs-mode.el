@@ -56,52 +56,6 @@
 ; process-adaptive-read-buffering
 ; process-kill-buffer-query-function
 
-;; window scheme
-
-; A window scheme is necessary and customizable. Although there are
-; limitless ways of arranging windows, there are basically 2 main
-; types of window to support, each with it's preferred species of
-; buffer:
-;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
-;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
-; During the 'merge' operation, one of the windows can show an 'merge'
-; buffer that can be edited before the 'final' gjs-app-script buffer
-; is displayed in the top window. Ergo, the user can:
-;      1. Just work with a source file and a repl. 
-;      2. Generate a default gjs-app-script and use it with a repl. 
-;      3. 'Merge' a source file with a template, edit the 'merge', and use
-;         the product gjs-app-script with a repl.
-
-; ido-display-buffer
-; ido-insert-buffer
-; ido-read-buffer
-; ido-switch-buffer
-; ido-switch-buffer-other-window
-; pop-to-buffer-same-window
-; display-message-or-buffer
-; set-buffer
-; set-window-buffer
-; window-buffer
-; show-buffer
-
-; display-buffer
-; display-buffer-fallback-action
-; display-buffer-function
-; display-buffer-pop-up-window
-; display-buffer-same-window
-; pop-to-buffer
-
-;; minibuffer
-
-; A recursive minibuffer can be used to make selections of templates,
-; options, etc., thus reducing some of the window handling overhead.
-
-; window-minibuffer-p
-; enable-recursive-minibuffers
-; eval-minibuffer
-; file-cache-minibuffer-complete
-; exit-minibuffer
-
 ;; gjs-app-template
 
 ; The gjs-app-template will be combined with a javascript source file
@@ -243,16 +197,37 @@
 
 ;; gjs-template-engine
 
-; The gjs-template-engine takes the list of templates and options and
+; The gjs-template-engine takes the template and list of options and
 ; combines them with the selected template to create a gjs-app-script.
+
+(defun gjs-template-engine (template-selection app-template-buffer) 
+  "Populate app-template-buffer with javascript code blocks
+  according to the struct of template-selection"
+  (evaluate-js-codeblocks-file ("./js-codeblocks.el"))
+  (append-to-buffer (app-template-buffer)
+					(do-list 
+					 (for-each slot (template-selection)
+							    (print (slot-default)
+				               if :gtk-native
+                               if :
 
 ; make-indirect-buffer
 ; clone-indirect-buffer-other-window
-
 ; make-variable-buffer-local
 
-; custom-buffer-create
-; custom-buffer-create-other-window
+(defun select-app-template (*gjs-app-templates* gjs-minibuffer-select)
+  "Select the template from the list of structs in *gjs-app-templates*."
+  (interactive gjs-minibuffer-select) template-selection))
+
+(defun create-app-template-buffer ()
+  custom-buffer-create app-template-buffer)
+
+
+
+;(defun function-name (arguments...)
+;       "optional-documentation..."
+;       (interactive argument-passing-info)     ; optional
+;       body...)
 
 ; buffer-string
 ; buffer-substring
@@ -263,7 +238,6 @@
 ; filter-buffer-substring-functions
 
 ; ediff-merge-buffers
-; ediff-merge-buffers-with-ancestor
 
 ; emerge-buffers
 ; emerge-buffers-with-ancestor
@@ -299,5 +273,51 @@
 ; revert-buffer
 ; switch-to-buffer-other-window
 ; buffer-offer-save
+
+;; window scheme
+
+; A window scheme is necessary and customizable. Although there are
+; limitless ways of arranging windows, there are basically 2 main
+; types of window to support, each with it's preferred species of
+; buffer:
+;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
+;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
+; During the 'merge' operation, one of the windows can show an 'merge'
+; buffer that can be edited before the 'final' gjs-app-script buffer
+; is displayed in the top window. Ergo, the user can:
+;      1. Just work with a source file and a repl. 
+;      2. Generate a default gjs-app-script and use it with a repl. 
+;      3. 'Merge' a source file with a template, edit the 'merge', and use
+;         the product gjs-app-script with a repl.
+
+; ido-display-buffer
+; ido-insert-buffer
+; ido-read-buffer
+; ido-switch-buffer
+; ido-switch-buffer-other-window
+; pop-to-buffer-same-window
+; display-message-or-buffer
+; set-buffer
+; set-window-buffer
+; window-buffer
+; show-buffer
+
+; display-buffer
+; display-buffer-fallback-action
+; display-buffer-function
+; display-buffer-pop-up-window
+; display-buffer-same-window
+; pop-to-buffer
+
+;; minibuffer
+
+; A recursive minibuffer can be used to make selections of templates,
+; options, etc., thus reducing some of the window handling overhead.
+
+; window-minibuffer-p
+; enable-recursive-minibuffers
+; eval-minibuffer
+; file-cache-minibuffer-complete
+; exit-minibuffer
 
 (provide 'gjs-mode)
