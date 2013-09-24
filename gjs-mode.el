@@ -61,26 +61,26 @@
 ; The gjs-app-template will be combined with a javascript source file
 ; to produce the gjs-app-script.
 
-(defstruct gjs-app-template
-  gjs-app-template-name
-  gjs-imports
-  gjs-app-name
-  gjs-app-title
-  gjs-headerbar
-  gjs-tabs
-  gjs-grid
-  gjs-popover
-  gjs-style
-  gjs-effect
-  gjs-image
-  gjs-label
-  gjs-webview)
+(defstruct app-template
+  template-name
+  imports
+  app-name
+  app-title
+  headerbar
+  tabs
+  grid
+  popover
+  style
+  effect
+  image
+  label
+  webview)
 
-(defvar *gjs-app-templates* nil)
+(defvar *app-templates* nil)
 
-(defun add-template (template) (push template *gjs-app-templates*))
+(defun add-template (template) (push template *app-templates*))
 
-(add-template (make-gjs-app-template))
+(add-template (make-app-template))
 
 ; The basic templates are: native-gtk, webkit-gtk, library,
 ; simple-webapp, cinnamon, unity and mate. The last three are mainly
@@ -88,110 +88,125 @@
 ; which code blocks will be included, and if so, what they will
 ; contain.
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'native-gtk
-	       :gjs-imports           'default
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'app-title
-	       :gjs-headerbar         'default
-	       :gjs-tabs              'default
-	       :gjs-grid              'default
-	       :gjs-popover           'default
-	       :gjs-style             'default
-	       :gjs-effect            'default
-	       :gjs-image             'default
-	       :gjs-label             'default
-	       :gjs-webview           'false))
+;<bpalmer> xk05: needs more mario
+;<xk05> flaming barrels or hammers?
+;<ijp> mushrooms, turtles, and green designers
+;<bpalmer> your defstruct seems like its field accessors will be insanely long.
+;<bpalmer> (defstruct gjs-app-template  gjs-app-template-name...  )  <-- do you really want to type (gjs-app-template-gjs-app-template-name o) ?
+;<bpalmer> I guess you're not really using accessors, though. hmm.
+;<bpalmer> I'd still probably suggest template-name instead of gjs-app-template-name, etc.
+;<xk05> accessors, template-name
+;<kprav33n> Hello! Does anyone use the `magit-interactive-resolve-item'?
+;<bpalmer> xk05: (defstruct foo a b)  makes functions so that you can do (foo-a (make-foo :a 3 :b 6)) => 3
+;<kprav33n> I tried to use it to resolve a merge conflict that I got. It opens up ediff and three frames. After addressing the conflict, how do I save and mark the item as resolved?
+;<xk05> ok
+;<bpalmer> you can also set them with (setf (foo-a o) 5)  to set a
+;<xk05> ok
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'webkit-gtk
-	       :gjs-imports           'webkit-gtk
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'app-title
-	       :gjs-headerbar         'default
-	       :gjs-tabs              'default
-	       :gjs-grid              'default
-	       :gjs-popover           'default
-	       :gjs-style             'default
-	       :gjs-effect            'default
-	       :gjs-image             'default
-	       :gjs-label             'default
-	       :gjs-webview           'true))
+(add-template (make-app-template
+	       :template-name     'native-gtk
+	       :imports           'default
+	       :app-name          'app-name
+	       :app-title         'app-title
+	       :headerbar         'default
+	       :tabs              'default
+	       :grid              'default
+	       :popover           'default
+	       :style             'default
+	       :effect            'default
+	       :image             'default
+	       :label             'default
+	       :webview           'false))
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'library
-	       :gjs-imports           'library
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'false
-	       :gjs-headerbar         'false
-	       :gjs-tabs              'false
-	       :gjs-grid              'false
-	       :gjs-popover           'false
-	       :gjs-style             'false
-	       :gjs-effect            'false
-	       :gjs-image             'false
-	       :gjs-label             'false
-	       :gjs-webview           'false))
+(add-template (make-app-template
+	       :template-name     'webkit-gtk
+	       :imports           'webkit-gtk
+	       :app-name          'app-name
+	       :app-title         'app-title
+	       :headerbar         'default
+	       :tabs              'default
+	       :grid              'default
+	       :popover           'default
+	       :style             'default
+	       :effect            'default
+	       :image             'default
+	       :label             'default
+	       :webview           'true))
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'simple-webapp
-	       :gjs-imports           'default
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'app-title
-	       :gjs-headerbar         'true
-	       :gjs-tabs              'false
-	       :gjs-grid              'false
-	       :gjs-popover           'false
-	       :gjs-style             'default
-	       :gjs-effect            'default
-	       :gjs-image             'default
-	       :gjs-label             'default
-           :gjs-webview           'true))
+(add-template (make-app-template
+	       :template-name     'library
+	       :imports           'library
+	       :app-name          'app-name
+	       :app-title         'false
+	       :headerbar         'false
+	       :tabs              'false
+	       :grid              'false
+	       :popover           'false
+	       :style             'false
+	       :effect            'false
+	       :image             'false
+	       :label             'false
+	       :webview           'false))
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'cinnamon
-	       :gjs-imports           'cinnamon
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'app-title
-	       :gjs-headerbar         'true
-	       :gjs-tabs              'default
-	       :gjs-grid              'true
-	       :gjs-popover           'default
-	       :gjs-style             'default
-	       :gjs-effect            'default
-	       :gjs-image             'default
-	       :gjs-label             'default
-           :gjs-webview           'default))
+(add-template (make-app-template
+	       :template-name     'simple-webapp
+	       :imports           'default
+	       :app-name          'app-name
+	       :app-title         'app-title
+	       :headerbar         'true
+	       :tabs              'false
+	       :grid              'false
+	       :popover           'false
+	       :style             'default
+	       :effect            'default
+	       :image             'default
+	       :label             'default
+           :webview           'true))
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'mate
-	       :gjs-imports           'mate
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'app-title
-	       :gjs-headerbar         'false
-	       :gjs-tabs              'default
-	       :gjs-grid              'true
-	       :gjs-popover           'default
-	       :gjs-style             'default
-	       :gjs-effect            'default
-	       :gjs-image             'default
-	       :gjs-label             'default
-           :gjs-webview           'default))
+(add-template (make-app-template
+	       :template-name     'cinnamon
+	       :imports           'cinnamon
+	       :app-name          'app-name
+	       :app-title         'app-title
+	       :headerbar         'true
+	       :tabs              'default
+	       :grid              'true
+	       :popover           'default
+	       :style             'default
+	       :effect            'default
+	       :image             'default
+	       :label             'default
+           :webview           'default))
 
-(add-template (make-gjs-app-template
-	       :gjs-app-template-name 'unity
-	       :gjs-imports           'unity
-	       :gjs-app-name          'app-name
-	       :gjs-app-title         'app-title
-	       :gjs-headerbar         'true
-	       :gjs-tabs              'default
-	       :gjs-grid              'true
-	       :gjs-popover           'default
-	       :gjs-style             'default
-	       :gjs-effect            'default
-	       :gjs-image             'default
-	       :gjs-label             'default
-           :gjs-webview           'default))
+(add-template (make-app-template
+	       :template-name     'mate
+	       :imports           'mate
+	       :app-name          'app-name
+	       :app-title         'app-title
+	       :headerbar         'false
+	       :tabs              'default
+	       :grid              'true
+	       :popover           'default
+	       :style             'default
+	       :effect            'default
+	       :image             'default
+	       :label             'default
+           :webview           'default))
+
+(add-template (make-app-template
+	       :template-name     'unity
+	       :imports           'unity
+	       :app-name          'app-name
+	       :app-title         'app-title
+	       :headerbar         'true
+	       :tabs              'default
+	       :grid              'true
+	       :popover           'default
+	       :style             'default
+	       :effect            'default
+	       :image             'default
+	       :label             'default
+           :webview           'default))
 
 ;;; Hammer Time
 
@@ -199,6 +214,19 @@
 
 ; The gjs-template-engine takes the template and list of options and
 ; combines them with the selected template to create a gjs-app-script.
+; The selection of the template occurs when the user runs 
+; 'M-x create-gjs-app-script RET'
+
+(defun create-gjs-app-script ()
+  "Presents user with a list of template choices, then runs
+  gjs-template-engine with the template-selection as it's
+  argument."
+  (interactive 
+   (pop-buffer (template-choices) ;; the recursive minibuffer later
+			   (ask-user-for-template ()
+									  template-selection)
+			   (kill-buffer (with-current-buffer)))
+   (gjs-template-engine (template-selection nil))))
 
 (defun gjs-template-engine (template-selection app-template-buffer) 
   "Populate app-template-buffer with javascript code blocks
@@ -215,7 +243,7 @@
 ; clone-indirect-buffer-other-window
 ; make-variable-buffer-local
 
-(defun select-app-template (*gjs-app-templates* gjs-minibuffer-select)
+(defun select-app-template (*app-templates* gjs-minibuffer-select)
   "Select the template from the list of structs in *gjs-app-templates*."
   (interactive gjs-minibuffer-select) template-selection))
 
