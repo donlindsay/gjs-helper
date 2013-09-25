@@ -18,7 +18,7 @@ js-comint:  http://sourceforge.net/projects/js-comint-el/?source=directory
 
 Note: Both js2-mode and js-comint are installable by emacs M-x
       list-packages RET after adding the marmalade repo from
-      http://marmalade-repo.org
+      http://marmalade-repo.org (melpa for js-comint)
 
 And, of course, GJS. GJS exists in the Debian and Ubuntu repositories
 as 'gjs' and can be installed with: 'sudo apt-get install gjs' Arch

@@ -66,32 +66,6 @@
 ;; appropriate imports. The options determine which code blocks will
 ;; be included, and if so, what they will contain.
 
-;<bpalmer> xk05: needs more mario
-;<xk05> flaming barrels or hammers?
-;<ijp> mushrooms, turtles, and green designers
-
-(defvar mario (flaming-barrels hammers mushrooms turtles green-designers))
- 
-;<bpalmer> your defstruct seems like its field accessors will be
-;          insanely long.
-;<bpalmer> (defstruct gjs-app-template gjs-app-template-name...  )
-;          <-- do you really want to type
-;          (gjs-app-template-gjs-app-template-name o) ?
-;<bpalmer> I guess you're not really using accessors, though. hmm.
-;<bpalmer> I'd still probably suggest template-name instead of
-;          gjs-app-template-name, etc.
-;<bpalmer> xk05: (defstruct foo a b) makes functions so that you can
-;          do (foo-a (make-foo :a 3 :b 6)) => 3
-
-;(template-gtk (make-app-template
-;			   :template-name  'gtk
-;              :imports        'default))
-
-;<bpalmer> you can also set them with (setf (foo-a o) 5)  to set a
-
-;(setf (template-gtk o) 5)
-
-; manual: http://www.gnu.org/software/emacs/manual/html_node/cl/Structures.html
 ;; (defstruct
 ;;                   (person
 ;;                    (:constructor nil)   ; no default constructor
@@ -103,19 +77,42 @@
 ;;                                                  (sex 'canine))))
 ;;                    name age sex)
 
+;; <bpalmer> xk05: needs more mario
+;; <xk05> flaming barrels or hammers?
+;; <ijp> mushrooms, turtles, and green designers
+
+(defvar mario (flaming-barrels hammers mushrooms turtles green-designers))
+ 
+;; <bpalmer> your defstruct seems like its field accessors will be
+;;          insanely long.
+;; <bpalmer> (defstruct gjs-app-template gjs-app-template-name...  )
+;;          <-- do you really want to type
+;;          (gjs-app-template-gjs-app-template-name o) ?
+;; <bpalmer> I guess you're not really using accessors, though. hmm.
+;; <bpalmer> I'd still probably suggest template-name instead of
+;;          gjs-app-template-name, etc.
+;; <bpalmer> xk05: (defstruct foo a b) makes functions so that you can
+;;           do (foo-a (make-foo :a 3 :b 6)) => 3
+;; <bpalmer> you can also set them with (setf (foo-a o) 5)  to set a
+;;
+
+(defstruct foo a b)
+(foo-a (make-foo :a 3 :b 6))
+(setf (foo-a o) 5)
+
+;; (template-gtk (make-app-template
+;; 			   :template-name  'gtk
+;; 			   :imports        'default))
+;;
+;; (setf (template-gtk o) 5)
+
+;; Emacs keeps complaining about multiple constructors, I dunno why,
+;; but ok. The LT sez dog one is closed. Time to setf lam-mode and
+;; find another way off the friggin beach.
+
 (defun create-gtk-template (app-skel)
   "Fill an app-skel struct with gtk app values."
   (make-app-skel (
-
-(defun create-webkit-template (app-skel)
-  "Fill an app-skel struct with webkit app values."
-  (make-app-skel
-
-(defun create-library-template (app-skel)
-  "Fill an app-skel struct with library values."
-  (make-app-skel
-
-;; emacs keeps complaining about multiple constructors, i dunno why
 
 (defstruct app-skel
   (:constructor make-gtk-app-skel
@@ -130,7 +127,11 @@
 		(image     'true) 
 		(style     'style)
 		))
-  (:constructor make-webkit-app-skel
+  
+(defun create-webkit-template (app-skel)
+  "Fill an app-skel struct with webkit app values."
+  (make-app-skel
+(:constructor make-webkit-app-skel
   (&key (name 'webkit)
 		(imports   ('gtk 'webkit))
 		(headerbar 'true)
@@ -142,7 +143,12 @@
 		(image     'default)
 		(style     'default)
 		))
-  (:constructor make-library-app-skel
+  
+(defun create-library-template (app-skel)
+  "Fill an app-skel struct with library values."
+  (make-app-skel
+
+(:constructor make-library-app-skel
   (&key (name 'library)
 		(imports   'gtk)
 		(headerbar 'false)
@@ -154,7 +160,9 @@
 		(image     'false)				  
 		(style     'false)
 		))
-  (:constructor new-cinn-app-skel
+  
+
+(:constructor new-cinn-app-skel
   (&key (name 'cinn)
 		(imports   ('gtk 'cinn))
 		(headerbar 'true)
@@ -166,7 +174,9 @@
 		(image     'true)				  
 		(style     'default)
 		))
-  (:constructor new-unity-app-skel
+  
+
+(:constructor new-unity-app-skel
   (&key (name 'unity)
 		(imports   ('gtk 'unity))
 		(headerbar 'true)
@@ -176,7 +186,9 @@
 		(tabs      (tabs-p))
 		(label     'true)
 		(image     'true)				  
-		(style 'default))))
+		(style 'default)
+		))
+  )
 
 ;; first draft way of doing it
 
