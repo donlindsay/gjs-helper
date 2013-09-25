@@ -61,160 +61,122 @@
 ; The gjs-app-template will be combined with a javascript source file
 ; to produce the gjs-app-script.
 
-
-; The basic templates are: native-gtk, webkit-gtk, library,
-; simple-webapp, cinnamon, unity and mate. The last three are mainly
-; for including/excluding appropriate imports. The options determine
-; which code blocks will be included, and if so, what they will
-; contain.
+;; The basic templates are: gtk, webkit, library, cinn(amon), and
+;; unity. The last three are mainly for including/excluding
+;; appropriate imports. The options determine which code blocks will
+;; be included, and if so, what they will contain.
 
 ;<bpalmer> xk05: needs more mario
-
 ;<xk05> flaming barrels or hammers?
-
 ;<ijp> mushrooms, turtles, and green designers
 
+(defvar mario (flaming-barrels hammers mushrooms turtles green-designers))
+ 
 ;<bpalmer> your defstruct seems like its field accessors will be
 ;          insanely long.
-
 ;<bpalmer> (defstruct gjs-app-template gjs-app-template-name...  )
 ;          <-- do you really want to type
 ;          (gjs-app-template-gjs-app-template-name o) ?
-
 ;<bpalmer> I guess you're not really using accessors, though. hmm.
-
 ;<bpalmer> I'd still probably suggest template-name instead of
 ;          gjs-app-template-name, etc.
-
 ;<bpalmer> xk05: (defstruct foo a b) makes functions so that you can
 ;          do (foo-a (make-foo :a 3 :b 6)) => 3
 
 ;(template-gtk (make-app-template
 ;			   :template-name  'gtk
-;               :imports        'default))
+;              :imports        'default))
 
 ;<bpalmer> you can also set them with (setf (foo-a o) 5)  to set a
 
 ;(setf (template-gtk o) 5)
 
 ; manual: http://www.gnu.org/software/emacs/manual/html_node/cl/Structures.html
-;(cl-defstruct
-;                   (person
-;                    (:constructor nil)   ; no default constructor
-;                    (:constructor new-person
-;                                  (name sex &optional (age 0)))
-;                    (:constructor new-hound (&key (name "Rover")
-;                                                  (dog-years 0)
-;                                             &aux (age (* 7 dog-years))
-;                                                  (sex 'canine))))
-;                   name age sex)
+;; (defstruct
+;;                   (person
+;;                    (:constructor nil)   ; no default constructor
+;;                    (:constructor new-person
+;;                                  (name sex &optional (age 0)))
+;;                    (:constructor new-hound (&key (name "Rover")
+;;                                                  (dog-years 0)
+;;                                             &aux (age (* 7 dog-years))
+;;                                                  (sex 'canine))))
+;;                    name age sex)
 
-(defstruct app-tplt
-  (:constructor new-gtk
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  ))
-  (:constructor new-webkit
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  ))
-  (:constructor new-webapp
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  ))
-  (:constructor new-library
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  ))
-  (:constructor new-cinn
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  ))
-  (:constructor new-mate
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  ))
-  (:constructor new-unity
-				(&key (tplt-name 'gtk)
-					  (imports   'gtk)
-					  (app-name  (app-name))
-					  (app-title (app-title))
-					  (headerbar 'true)
-					  (grid      'true)
-					  (webkit    'default)					  
-					  (tabs      (tabs-p))
-					  (label     'default)
-					  (image     'default)				  
-					  (style     'default)
-					  (effect    'default)
-					  (popover   (popover-p))
-					  )))
+(defun create-gtk-template (app-skel)
+  "Fill an app-skel struct with gtk app values."
+  (make-app-skel (
+
+(defun create-webkit-template (app-skel)
+  "Fill an app-skel struct with webkit app values."
+  (make-app-skel
+
+(defun create-library-template (app-skel)
+  "Fill an app-skel struct with library values."
+  (make-app-skel
+
+;; emacs keeps complaining about multiple constructors, i dunno why
+
+(defstruct app-skel
+  (:constructor make-gtk-app-skel
+  (&key (name      'gtk)
+		(imports   'gtk)
+		(headerbar (headerbar-p))
+		(popover   (popover-p))
+		(grid      (grid-p))
+		(webkit    (webkit-p))
+		(tabs      (tabs-p))
+		(label     'true)
+		(image     'true) 
+		(style     'style)
+		))
+  (:constructor make-webkit-app-skel
+  (&key (name 'webkit)
+		(imports   ('gtk 'webkit))
+		(headerbar 'true)
+		(popover   'false)
+		(grid      'true)
+		(webkit    'true)	
+		(tabs      (tabs-p))
+		(label     'default)
+		(image     'default)
+		(style     'default)
+		))
+  (:constructor make-library-app-skel
+  (&key (name 'library)
+		(imports   'gtk)
+		(headerbar 'false)
+		(popover   'false)
+		(grid      'false)
+		(webkit    'false)					  
+		(tabs      'false)
+		(label     'false)
+		(image     'false)				  
+		(style     'false)
+		))
+  (:constructor new-cinn-app-skel
+  (&key (name 'cinn)
+		(imports   ('gtk 'cinn))
+		(headerbar 'true)
+		(popover   'false)
+		(grid      'true)
+		(webkit    'false)					  
+		(tabs      (tabs-p))
+		(label     'true)
+		(image     'true)				  
+		(style     'default)
+		))
+  (:constructor new-unity-app-skel
+  (&key (name 'unity)
+		(imports   ('gtk 'unity))
+		(headerbar 'true)
+		(popover   (popover-p))
+		(grid      'true)
+		(webkit    'false)					  
+		(tabs      (tabs-p))
+		(label     'true)
+		(image     'true)				  
+		(style 'default))))
 
 ;; first draft way of doing it
 
