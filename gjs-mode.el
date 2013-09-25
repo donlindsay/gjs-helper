@@ -61,26 +61,6 @@
 ; The gjs-app-template will be combined with a javascript source file
 ; to produce the gjs-app-script.
 
-(defstruct app-template
-  template-name
-  imports
-  app-name
-  app-title
-  headerbar
-  tabs
-  grid
-  popover
-  style
-  effect
-  image
-  label
-  webview)
-
-(defvar *app-templates* nil)
-
-(defun add-template (template) (push template *app-templates*))
-
-(add-template (make-app-template))
 
 ; The basic templates are: native-gtk, webkit-gtk, library,
 ; simple-webapp, cinnamon, unity and mate. The last three are mainly
@@ -89,124 +69,270 @@
 ; contain.
 
 ;<bpalmer> xk05: needs more mario
+
 ;<xk05> flaming barrels or hammers?
+
 ;<ijp> mushrooms, turtles, and green designers
-;<bpalmer> your defstruct seems like its field accessors will be insanely long.
-;<bpalmer> (defstruct gjs-app-template  gjs-app-template-name...  )  <-- do you really want to type (gjs-app-template-gjs-app-template-name o) ?
+
+;<bpalmer> your defstruct seems like its field accessors will be
+;          insanely long.
+
+;<bpalmer> (defstruct gjs-app-template gjs-app-template-name...  )
+;          <-- do you really want to type
+;          (gjs-app-template-gjs-app-template-name o) ?
+
 ;<bpalmer> I guess you're not really using accessors, though. hmm.
-;<bpalmer> I'd still probably suggest template-name instead of gjs-app-template-name, etc.
-;<xk05> accessors, template-name
-;<kprav33n> Hello! Does anyone use the `magit-interactive-resolve-item'?
-;<bpalmer> xk05: (defstruct foo a b)  makes functions so that you can do (foo-a (make-foo :a 3 :b 6)) => 3
-;<kprav33n> I tried to use it to resolve a merge conflict that I got. It opens up ediff and three frames. After addressing the conflict, how do I save and mark the item as resolved?
-;<xk05> ok
+
+;<bpalmer> I'd still probably suggest template-name instead of
+;          gjs-app-template-name, etc.
+
+;<bpalmer> xk05: (defstruct foo a b) makes functions so that you can
+;          do (foo-a (make-foo :a 3 :b 6)) => 3
+
+;(template-gtk (make-app-template
+;			   :template-name  'gtk
+;               :imports        'default))
+
 ;<bpalmer> you can also set them with (setf (foo-a o) 5)  to set a
-;<xk05> ok
 
-(add-template (make-app-template
-	       :template-name     'native-gtk
-	       :imports           'default
-	       :app-name          'app-name
-	       :app-title         'app-title
-	       :headerbar         'default
-	       :tabs              'default
-	       :grid              'default
-	       :popover           'default
-	       :style             'default
-	       :effect            'default
-	       :image             'default
-	       :label             'default
-	       :webview           'false))
+;(setf (template-gtk o) 5)
 
-(add-template (make-app-template
-	       :template-name     'webkit-gtk
-	       :imports           'webkit-gtk
-	       :app-name          'app-name
-	       :app-title         'app-title
-	       :headerbar         'default
-	       :tabs              'default
-	       :grid              'default
-	       :popover           'default
-	       :style             'default
-	       :effect            'default
-	       :image             'default
-	       :label             'default
-	       :webview           'true))
+; manual: http://www.gnu.org/software/emacs/manual/html_node/cl/Structures.html
+;(cl-defstruct
+;                   (person
+;                    (:constructor nil)   ; no default constructor
+;                    (:constructor new-person
+;                                  (name sex &optional (age 0)))
+;                    (:constructor new-hound (&key (name "Rover")
+;                                                  (dog-years 0)
+;                                             &aux (age (* 7 dog-years))
+;                                                  (sex 'canine))))
+;                   name age sex)
 
-(add-template (make-app-template
-	       :template-name     'library
-	       :imports           'library
-	       :app-name          'app-name
-	       :app-title         'false
-	       :headerbar         'false
-	       :tabs              'false
-	       :grid              'false
-	       :popover           'false
-	       :style             'false
-	       :effect            'false
-	       :image             'false
-	       :label             'false
-	       :webview           'false))
+(defstruct app-tplt
+  (:constructor new-gtk
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  ))
+  (:constructor new-webkit
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  ))
+  (:constructor new-webapp
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  ))
+  (:constructor new-library
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  ))
+  (:constructor new-cinn
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  ))
+  (:constructor new-mate
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  ))
+  (:constructor new-unity
+				(&key (tplt-name 'gtk)
+					  (imports   'gtk)
+					  (app-name  (app-name))
+					  (app-title (app-title))
+					  (headerbar 'true)
+					  (grid      'true)
+					  (webkit    'default)					  
+					  (tabs      (tabs-p))
+					  (label     'default)
+					  (image     'default)				  
+					  (style     'default)
+					  (effect    'default)
+					  (popover   (popover-p))
+					  )))
 
-(add-template (make-app-template
-	       :template-name     'simple-webapp
-	       :imports           'default
-	       :app-name          'app-name
-	       :app-title         'app-title
-	       :headerbar         'true
-	       :tabs              'false
-	       :grid              'false
-	       :popover           'false
-	       :style             'default
-	       :effect            'default
-	       :image             'default
-	       :label             'default
-           :webview           'true))
+;; first draft way of doing it
 
-(add-template (make-app-template
-	       :template-name     'cinnamon
-	       :imports           'cinnamon
-	       :app-name          'app-name
-	       :app-title         'app-title
-	       :headerbar         'true
-	       :tabs              'default
-	       :grid              'true
-	       :popover           'default
-	       :style             'default
-	       :effect            'default
-	       :image             'default
-	       :label             'default
-           :webview           'default))
-
-(add-template (make-app-template
-	       :template-name     'mate
-	       :imports           'mate
-	       :app-name          'app-name
-	       :app-title         'app-title
-	       :headerbar         'false
-	       :tabs              'default
-	       :grid              'true
-	       :popover           'default
-	       :style             'default
-	       :effect            'default
-	       :image             'default
-	       :label             'default
-           :webview           'default))
-
-(add-template (make-app-template
-	       :template-name     'unity
-	       :imports           'unity
-	       :app-name          'app-name
-	       :app-title         'app-title
-	       :headerbar         'true
-	       :tabs              'default
-	       :grid              'true
-	       :popover           'default
-	       :style             'default
-	       :effect            'default
-	       :image             'default
-	       :label             'default
-           :webview           'default))
+;; (defstruct app-template
+;;   template-name
+;;   imports
+;;   app-name
+;;   app-title
+;;   headerbar
+;;   tabs
+;;   grid
+;;   popover
+;;   style
+;;   effect
+;;   image
+;;   label
+;;   webview)
+;; (defvar *app-templates* nil)
+;; (defun add-template (template) (push template *app-templates*))
+;; (add-template (make-app-template))
+;; (add-template (make-app-template
+;; 	       :template-name     'native-gtk
+;; 	       :imports           'default
+;; 	       :app-name          'app-name
+;; 	       :app-title         'app-title
+;; 	       :headerbar         'default
+;; 	       :tabs              'default
+;; 	       :grid              'default
+;; 	       :popover           'default
+;; 	       :style             'default
+;; 	       :effect            'default
+;; 	       :image             'default
+;; 	       :label             'default
+;; 	       :webview           'false))
+;; (add-template (make-app-template
+;; 	       :template-name     'webkit-gtk
+;; 	       :imports           'webkit-gtk
+;; 	       :app-name          'app-name
+;; 	       :app-title         'app-title
+;; 	       :headerbar         'default
+;; 	       :tabs              'default
+;; 	       :grid              'default
+;; 	       :popover           'default
+;; 	       :style             'default
+;; 	       :effect            'default
+;; 	       :image             'default
+;; 	       :label             'default
+;; 	       :webview           'true))
+;; (add-template (make-app-template
+;; 	       :template-name     'library
+;; 	       :imports           'library
+;; 	       :app-name          'app-name
+;; 	       :app-title         'false
+;; 	       :headerbar         'false
+;; 	       :tabs              'false
+;; 	       :grid              'false
+;; 	       :popover           'false
+;; 	       :style             'false
+;; 	       :effect            'false
+;; 	       :image             'false
+;; 	       :label             'false
+;; 	       :webview           'false))
+;; (add-template (make-app-template
+;; 	       :template-name     'simple-webapp
+;; 	       :imports           'default
+;; 	       :app-name          'app-name
+;; 	       :app-title         'app-title
+;; 	       :headerbar         'true
+;; 	       :tabs              'false
+;; 	       :grid              'false
+;; 	       :popover           'false
+;; 	       :style             'default
+;; 	       :effect            'default
+;; 	       :image             'default
+;; 	       :label             'default
+;;         :webview           'true))
+;; (add-template (make-app-template
+;; 	       :template-name     'cinnamon
+;; 	       :imports           'cinnamon
+;; 	       :app-name          'app-name
+;; 	       :app-title         'app-title
+;; 	       :headerbar         'true
+;; 	       :tabs              'default
+;; 	       :grid              'true
+;; 	       :popover           'default
+;; 	       :style             'default
+;; 	       :effect            'default
+;; 	       :image             'default
+;; 	       :label             'default
+;;            :webview           'default))
+;; (add-template (make-app-template
+;; 	       :template-name     'mate
+;; 	       :imports           'mate
+;; 	       :app-name          'app-name
+;; 	       :app-title         'app-title
+;; 	       :headerbar         'false
+;; 	       :tabs              'default
+;; 	       :grid              'true
+;; 	       :popover           'default
+;; 	       :style             'default
+;; 	       :effect            'default
+;; 	       :image             'default
+;; 	       :label             'default
+;;         :webview           'default))
+;; (add-template (make-app-template
+;; 	       :template-name     'unity
+;; 	       :imports           'unity
+;; 	       :app-name          'app-name
+;; 	       :app-title         'app-title
+;; 	       :headerbar         'true
+;; 	       :tabs              'default
+;; 	       :grid              'true
+;; 	       :popover           'default
+;; 	       :style             'default
+;; 	       :effect            'default
+;; 	       :image             'default
+;; 	       :label             'default
+;;         :webview           'default))
 
 ;;; Hammer Time
 
