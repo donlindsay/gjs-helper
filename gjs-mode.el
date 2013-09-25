@@ -49,6 +49,50 @@
 
 (setq gjs-js-codeblocks-file "./js-codeblocks.el")
 
+(setq js-codeblocks-index nil)
+
+;;; gjs-template-engine
+;; The gjs-template-engine takes the template and list of options and
+;; combines them with the selected template to create a gjs-app-script.
+
+(defun run-template-motor (app-skel-selection) 
+  "Populate app-template-buffer with javascript code blocks
+  according to the scheme of app-skel-selection"
+  (evaluate-js-codeblocks-file)
+  (create-app-template-buffer)
+  (switch-to-buffer (app-template-buffer))
+  (iterate-over (app-skel-selection) 
+				(for (each-slot) (app-skel-selection)
+					 (with-a-match-from 
+					  (js-codeblocks-file)
+					  (append-to-buffer (app-template-buffer) 
+										(matching-codeblock))
+					  ))))
+
+(defun create-app-template-buffer ()
+  "Create a new buffer to write the codeblocks to."
+  custom-buffer-create (app-template-buffer))
+
+(defun create-js-codeblocks-index (gjs-js-codeblocks-file)
+  "Read the list of js-codeblocks into a nested array for
+   matching against app-skel-selection slots."
+  (load-file ()
+			 (do-once 
+			  (push js-codeblock-ident 
+					(app-skel-name (app-skel-slot))
+					(js-codeblocks-index)))))
+
+;;; Request information from user
+;; Popup window, or minibuffer.
+(defun request-template-name ()
+  "Request the name of the template from user."
+  (interactive 
+   (pop-buffer (template-choices) ;; the recursive minibuffer later
+			   (ask-user-for-template ()
+									  template-selection)
+			   (kill-buffer (with-current-buffer)))
+   (gjs-template-engine (template-selection nil))))
+
 ;;; app-skel
 ;; The struct, app-skel, used to set options for the template
 ;; generator.  The basic templates are: 
@@ -69,7 +113,7 @@
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
 		(app-skel-image     'true) 
-		(app-skel-style     'style)
+		(app-skel-style     'true)
 		))
 
 (defun create-webkit-skel (app-skel)
@@ -81,9 +125,9 @@
 		(app-skel-grid      'true)
 		(app-skel-webkit    'true)	
 		(app-skel-tabs      (tabs-p))
-		(app-skel-label     'default)
-		(app-skel-image     'default)
-		(app-skel-style     'default)
+		(app-skel-label     'true)
+		(app-skel-image     'true)
+		(app-skel-style     'true)
 		))
   
 (defun create-library-skel (app-skel)
@@ -100,8 +144,8 @@
 		(app-skel-style     'false)
 		))
   
-(defun create-library-skel (app-skel)
-  "Fill an app-skel struct with library values."
+(defun create-cinn-skel (app-skel)
+  "Fill an app-skel struct with cinn values."
   (setf (app-skel-name      'cinn)
 		(app-skel-imports   ('gtk 'cinn))
 		(app-skel-headerbar 'true)
@@ -111,7 +155,7 @@
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
 		(app-skel-image     'true)				  
-		(app-skel-style     'default)
+		(app-skel-style     'true)
 		))
   
 (defun create-unity-skel (app-skel)
@@ -125,48 +169,79 @@
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
 		(app-skel-image     'true)				  
-		(app-skel-style     'default)
+		(app-skel-style     'true)
 		))
 
-;;; Request information from user
-;; Popup window, or minibuffer.
+(provide 'gjs-mode)
 
-(defun request-template-name ()
-  "Request the name of the template from user."
-  (interactive 
-   (pop-buffer (template-choices) ;; the recursive minibuffer later
-			   (ask-user-for-template ()
-									  template-selection)
-			   (kill-buffer (with-current-buffer)))
-   (gjs-template-engine (template-selection nil))))
+;;; Errata & TODO
 
-;;; gjs-template-engine
-;; The gjs-template-engine takes the template and list of options and
-;; combines them with the selected template to create a gjs-app-script.
+;; <bpalmer> xk05: needs more mario
+;;           (defstruct foo a b)
+;;           (foo-a (make-foo :a 3 :b 6)) => 3
+;;           (setf (foo-a o) 5)
+;; (defvar mario '(flaming-barrels hammers mushrooms turtles green-designers))
 
-(defun select-app-skel (gjs-minibuffer-select)
-  "Select the app-skel."
-  (interactive minibuffer-select) app-skel-selection))
+;;; REPL
+;; Setting up, creating the gjs-repl window, and starting the gjs
+;; shell. These tasks are currently being performed by js-comint.
 
-(defun run-template-motor (app-skel-selection) 
-  "Populate app-template-buffer with javascript code blocks
-  according to the scheme of app-skel-selection"
-  (create-app-template-buffer)
-  (switch-to-buffer (app-template-buffer))
-  (evaluate-js-codeblocks-file)
-  (append-to-buffer (app-template-buffer)
-					(do-list 
-					 (for-each slot (template-selection)
-							    (print (slot-default)
-									   if 'gtk
-									   if 'webkit
+; make-comint-in-buffer 
+; gjs-inferior-js-program
+; get-buffer
+; get-buffer-create
+; copy-to-buffer
+; process-adaptive-read-buffering
+; process-kill-buffer-query-function
 
-(defun create-app-template-buffer ()
-  custom-buffer-create (app-template-buffer))
+;;; Minibuffer
+;; A recursive minibuffer can be used to make selections of templates,
+;; options, etc., thus reducing some of the window handling overhead.
 
-;;; gjs-app-script
-;; gjs-app-script is javascript produced by run-template-motor. Opened
-;; in it's own buffer and the user can save, load, run or edit.
+;(defun select-app-skel (gjs-minibuffer-select)
+;  "Select the app-skel."
+;  (interactive minibuffer-select) app-skel-selection))
+
+; window-minibuffer-p
+; enable-recursive-minibuffers
+; eval-minibuffer
+; file-cache-minibuffer-complete
+; exit-minibuffer
+
+;;; Window scheme
+;; A window scheme is necessary and customizable. Although there are
+;; limitless ways of arranging windows, there are basically 2 main
+;; types of window to support, each with it's preferred species of
+;; buffer:
+;;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
+;;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
+;; During the 'merge' operation, one of the windows can show an 'merge'
+;; buffer that can be edited before the 'final' gjs-app-script buffer
+;; is displayed in the top window. Ergo, the user can:
+;;      1. Just work with a source file and a repl. 
+;;      2. Generate a default gjs-app-script and use it with a repl. 
+;;      3. 'Merge' a source file with a template, edit the 'merge', and use
+;;         the product gjs-app-script with a repl.
+
+
+; ido-display-buffer
+; ido-insert-buffer
+; ido-read-buffer
+; ido-switch-buffer
+; ido-switch-buffer-other-window
+; pop-to-buffer-same-window
+; display-message-or-buffer
+; set-buffer
+; set-window-buffer
+; window-buffer
+; show-buffer
+
+; display-buffer
+; display-buffer-fallback-action
+; display-buffer-function
+; display-buffer-pop-up-window
+; display-buffer-same-window
+; pop-to-buffer
 
 ; make-indirect-buffer
 ; clone-indirect-buffer-other-window
@@ -192,68 +267,6 @@
 ; revert-buffer
 ; switch-to-buffer-other-window
 ; buffer-offer-save
-
-;;; window scheme
-;; A window scheme is necessary and customizable. Although there are
-;; limitless ways of arranging windows, there are basically 2 main
-;; types of window to support, each with it's preferred species of
-;; buffer:
-;;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
-;;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
-;; During the 'merge' operation, one of the windows can show an 'merge'
-;; buffer that can be edited before the 'final' gjs-app-script buffer
-;; is displayed in the top window. Ergo, the user can:
-;;      1. Just work with a source file and a repl. 
-;;      2. Generate a default gjs-app-script and use it with a repl. 
-;;      3. 'Merge' a source file with a template, edit the 'merge', and use
-;;         the product gjs-app-script with a repl.
-; ido-display-buffer
-; ido-insert-buffer
-; ido-read-buffer
-; ido-switch-buffer
-; ido-switch-buffer-other-window
-; pop-to-buffer-same-window
-; display-message-or-buffer
-; set-buffer
-; set-window-buffer
-; window-buffer
-; show-buffer
-
-; display-buffer
-; display-buffer-fallback-action
-; display-buffer-function
-; display-buffer-pop-up-window
-; display-buffer-same-window
-; pop-to-buffer
-
-(provide 'gjs-mode)
-
-;;; Errata & TODO
-;; <bpalmer> xk05: needs more mario
-;;           (defstruct foo a b)
-;;           (foo-a (make-foo :a 3 :b 6)) => 3
-;;           (setf (foo-a o) 5)
-;; (defvar mario '(flaming-barrels hammers mushrooms turtles green-designers))
-
-;;; REPL
-;; Setting up, creating the gjs-repl window, and starting the gjs
-;; shell. These tasks are currently being performed by js-comint.
-; make-comint-in-buffer 
-; gjs-inferior-js-program
-; get-buffer
-; get-buffer-create
-; copy-to-buffer
-; process-adaptive-read-buffering
-; process-kill-buffer-query-function
-
-;;; Minibuffer
-;; A recursive minibuffer can be used to make selections of templates,
-;; options, etc., thus reducing some of the window handling overhead.
-; window-minibuffer-p
-; enable-recursive-minibuffers
-; eval-minibuffer
-; file-cache-minibuffer-complete
-; exit-minibuffer
 
 ;; Emacs keeps complaining about multiple constructors, I dunno why,
 ;; but ok. The LT sez dog one is closed. Time to setf lam-mode and
