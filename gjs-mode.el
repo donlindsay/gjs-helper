@@ -28,13 +28,16 @@
 ;;
 ;; Dependencies:  js2-mode js-comint gjs
 ;; 
-;; Code:
+;; Pause For The Cause: (defun function-name (arguments...)
+;;                       "optional-documentation..."
+;;                       (interactive argument-passing-info) ; optional
+;;                        body...)
+;; Hammer Time:
 
-;(require 'js2-mode) ;uncomment this if you aren't using (m)elpa
-(require 'cl)
-(require 'js-comint)
+;(require 'js2-mode)
+;(require 'js-comint)
 
-(setq gjs-inferior-js-program "/usr/bin/gjs") 
+;;; The gjs-repl-mode is based on js-comint repl.
 
 (define-derived-mode gjs-mode 
   js-comint "*gjs-repl*"
@@ -42,285 +45,94 @@
   (set (make-local-variable 'inferior-js-program-command)
        gjs-inferior-js-program))
 
-;; gjs-repl
+(setq gjs-inferior-js-program "/usr/bin/gjs") 
 
-; This section for setting up, creating the gjs-repl window, and
-; starting the gjs shell. These tasks are currently being performed by
-; js-comint.
+(setq gjs-js-codeblocks-file "./js-codeblocks.el")
 
-; make-comint-in-buffer 
-; gjs-inferior-js-program
-; get-buffer
-; get-buffer-create
-; copy-to-buffer
-; process-adaptive-read-buffering
-; process-kill-buffer-query-function
-
-;; gjs-app-template
-
-; The gjs-app-template will be combined with a javascript source file
-; to produce the gjs-app-script.
-
-;; The basic templates are: gtk, webkit, library, cinn(amon), and
-;; unity. The last three are mainly for including/excluding
-;; appropriate imports. The options determine which code blocks will
-;; be included, and if so, what they will contain.
-
-;; (defstruct
-;;                   (person
-;;                    (:constructor nil)   ; no default constructor
-;;                    (:constructor new-person
-;;                                  (name sex &optional (age 0)))
-;;                    (:constructor new-hound (&key (name "Rover")
-;;                                                  (dog-years 0)
-;;                                             &aux (age (* 7 dog-years))
-;;                                                  (sex 'canine))))
-;;                    name age sex)
-
-;; <bpalmer> xk05: needs more mario
-;; <xk05> flaming barrels or hammers?
-;; <ijp> mushrooms, turtles, and green designers
-
-(defvar mario (flaming-barrels hammers mushrooms turtles green-designers))
- 
-;; <bpalmer> your defstruct seems like its field accessors will be
-;;          insanely long.
-;; <bpalmer> (defstruct gjs-app-template gjs-app-template-name...  )
-;;          <-- do you really want to type
-;;          (gjs-app-template-gjs-app-template-name o) ?
-;; <bpalmer> I guess you're not really using accessors, though. hmm.
-;; <bpalmer> I'd still probably suggest template-name instead of
-;;          gjs-app-template-name, etc.
-;; <bpalmer> xk05: (defstruct foo a b) makes functions so that you can
-;;           do (foo-a (make-foo :a 3 :b 6)) => 3
-;; <bpalmer> you can also set them with (setf (foo-a o) 5)  to set a
-;;
-
-(defstruct foo a b)
-(foo-a (make-foo :a 3 :b 6))
-(setf (foo-a o) 5)
-
-;; (template-gtk (make-app-template
-;; 			   :template-name  'gtk
-;; 			   :imports        'default))
-;;
-;; (setf (template-gtk o) 5)
-
-;; Emacs keeps complaining about multiple constructors, I dunno why,
-;; but ok. The LT sez dog one is closed. Time to setf lam-mode and
-;; find another way off the friggin beach.
-
-(defun create-gtk-template (app-skel)
-  "Fill an app-skel struct with gtk app values."
-  (make-app-skel (
+;;; app-skel
+;; The struct, app-skel, used to set options for the template
+;; generator.  The basic templates are: 
+;; gtk, webkit, library, cinn(amon), and unity 
 
 (defstruct app-skel
-  (:constructor make-gtk-app-skel
-  (&key (name      'gtk)
-		(imports   'gtk)
-		(headerbar (headerbar-p))
-		(popover   (popover-p))
-		(grid      (grid-p))
-		(webkit    (webkit-p))
-		(tabs      (tabs-p))
-		(label     'true)
-		(image     'true) 
-		(style     'style)
-		))
+  (name) (imports) (headerbar) (popover) (grid) (webkit)
+  (tabs) (label) (image) (style))
   
-(defun create-webkit-template (app-skel)
+(defun create-gtk-skel (app-skel)
+  "Fill an app-skel struct with gtk app values."
+  (setf (app-skel-name      'gtk)
+		(app-skel-imports   'gtk)
+		(app-skel-headerbar (headerbar-p))
+		(app-skel-popover   (popover-p))
+		(app-skel-grid      (grid-p))
+		(app-skel-webkit    (webkit-p))
+		(app-skel-tabs      (tabs-p))
+		(app-skel-label     'true)
+		(app-skel-image     'true) 
+		(app-skel-style     'style)
+		))
+
+(defun create-webkit-skel (app-skel)
   "Fill an app-skel struct with webkit app values."
-  (make-app-skel
-(:constructor make-webkit-app-skel
-  (&key (name 'webkit)
-		(imports   ('gtk 'webkit))
-		(headerbar 'true)
-		(popover   'false)
-		(grid      'true)
-		(webkit    'true)	
-		(tabs      (tabs-p))
-		(label     'default)
-		(image     'default)
-		(style     'default)
+  (setf (app-skel-name      'webkit)
+		(app-skel-imports   ('gtk 'webkit))
+		(app-skel-headerbar 'true)
+		(app-skel-popover   'false)
+		(app-skel-grid      'true)
+		(app-skel-webkit    'true)	
+		(app-skel-tabs      (tabs-p))
+		(app-skel-label     'default)
+		(app-skel-image     'default)
+		(app-skel-style     'default)
 		))
   
-(defun create-library-template (app-skel)
+(defun create-library-skel (app-skel)
   "Fill an app-skel struct with library values."
-  (make-app-skel
-
-(:constructor make-library-app-skel
-  (&key (name 'library)
-		(imports   'gtk)
-		(headerbar 'false)
-		(popover   'false)
-		(grid      'false)
-		(webkit    'false)					  
-		(tabs      'false)
-		(label     'false)
-		(image     'false)				  
-		(style     'false)
+  (setf (app-skel-name      'library)
+		(app-skel-imports   'gtk)
+		(app-skel-headerbar 'false)
+		(app-skel-popover   'false)
+		(app-skel-grid      'false)
+		(app-skel-webkit    'false)					  
+		(app-skel-tabs      'false)
+		(app-skel-label     'false)
+		(app-skel-image     'false)				  
+		(app-skel-style     'false)
 		))
   
-
-(:constructor new-cinn-app-skel
-  (&key (name 'cinn)
-		(imports   ('gtk 'cinn))
-		(headerbar 'true)
-		(popover   'false)
-		(grid      'true)
-		(webkit    'false)					  
-		(tabs      (tabs-p))
-		(label     'true)
-		(image     'true)				  
-		(style     'default)
+(defun create-library-skel (app-skel)
+  "Fill an app-skel struct with library values."
+  (setf (app-skel-name      'cinn)
+		(app-skel-imports   ('gtk 'cinn))
+		(app-skel-headerbar 'true)
+		(app-skel-popover   'false)
+		(app-skel-grid      'true)
+		(app-skel-webkit    'false)					  
+		(app-skel-tabs      (tabs-p))
+		(app-skel-label     'true)
+		(app-skel-image     'true)				  
+		(app-skel-style     'default)
 		))
   
-
-(:constructor new-unity-app-skel
-  (&key (name 'unity)
-		(imports   ('gtk 'unity))
-		(headerbar 'true)
-		(popover   (popover-p))
-		(grid      'true)
-		(webkit    'false)					  
-		(tabs      (tabs-p))
-		(label     'true)
-		(image     'true)				  
-		(style 'default)
+(defun create-unity-skel (app-skel)
+  "Fill an app-skel struct with unity values."
+  (setf (app-skel-name      'unity)
+		(app-skel-imports   ('gtk 'unity))
+		(app-skel-headerbar 'true)
+		(app-skel-popover   (popover-p))
+		(app-skel-grid      'true)
+		(app-skel-webkit    'false)					  
+		(app-skel-tabs      (tabs-p))
+		(app-skel-label     'true)
+		(app-skel-image     'true)				  
+		(app-skel-style     'default)
 		))
-  )
 
-;; first draft way of doing it
+;;; Request information from user
+;; Popup window, or minibuffer.
 
-;; (defstruct app-template
-;;   template-name
-;;   imports
-;;   app-name
-;;   app-title
-;;   headerbar
-;;   tabs
-;;   grid
-;;   popover
-;;   style
-;;   effect
-;;   image
-;;   label
-;;   webview)
-;; (defvar *app-templates* nil)
-;; (defun add-template (template) (push template *app-templates*))
-;; (add-template (make-app-template))
-;; (add-template (make-app-template
-;; 	       :template-name     'native-gtk
-;; 	       :imports           'default
-;; 	       :app-name          'app-name
-;; 	       :app-title         'app-title
-;; 	       :headerbar         'default
-;; 	       :tabs              'default
-;; 	       :grid              'default
-;; 	       :popover           'default
-;; 	       :style             'default
-;; 	       :effect            'default
-;; 	       :image             'default
-;; 	       :label             'default
-;; 	       :webview           'false))
-;; (add-template (make-app-template
-;; 	       :template-name     'webkit-gtk
-;; 	       :imports           'webkit-gtk
-;; 	       :app-name          'app-name
-;; 	       :app-title         'app-title
-;; 	       :headerbar         'default
-;; 	       :tabs              'default
-;; 	       :grid              'default
-;; 	       :popover           'default
-;; 	       :style             'default
-;; 	       :effect            'default
-;; 	       :image             'default
-;; 	       :label             'default
-;; 	       :webview           'true))
-;; (add-template (make-app-template
-;; 	       :template-name     'library
-;; 	       :imports           'library
-;; 	       :app-name          'app-name
-;; 	       :app-title         'false
-;; 	       :headerbar         'false
-;; 	       :tabs              'false
-;; 	       :grid              'false
-;; 	       :popover           'false
-;; 	       :style             'false
-;; 	       :effect            'false
-;; 	       :image             'false
-;; 	       :label             'false
-;; 	       :webview           'false))
-;; (add-template (make-app-template
-;; 	       :template-name     'simple-webapp
-;; 	       :imports           'default
-;; 	       :app-name          'app-name
-;; 	       :app-title         'app-title
-;; 	       :headerbar         'true
-;; 	       :tabs              'false
-;; 	       :grid              'false
-;; 	       :popover           'false
-;; 	       :style             'default
-;; 	       :effect            'default
-;; 	       :image             'default
-;; 	       :label             'default
-;;         :webview           'true))
-;; (add-template (make-app-template
-;; 	       :template-name     'cinnamon
-;; 	       :imports           'cinnamon
-;; 	       :app-name          'app-name
-;; 	       :app-title         'app-title
-;; 	       :headerbar         'true
-;; 	       :tabs              'default
-;; 	       :grid              'true
-;; 	       :popover           'default
-;; 	       :style             'default
-;; 	       :effect            'default
-;; 	       :image             'default
-;; 	       :label             'default
-;;            :webview           'default))
-;; (add-template (make-app-template
-;; 	       :template-name     'mate
-;; 	       :imports           'mate
-;; 	       :app-name          'app-name
-;; 	       :app-title         'app-title
-;; 	       :headerbar         'false
-;; 	       :tabs              'default
-;; 	       :grid              'true
-;; 	       :popover           'default
-;; 	       :style             'default
-;; 	       :effect            'default
-;; 	       :image             'default
-;; 	       :label             'default
-;;         :webview           'default))
-;; (add-template (make-app-template
-;; 	       :template-name     'unity
-;; 	       :imports           'unity
-;; 	       :app-name          'app-name
-;; 	       :app-title         'app-title
-;; 	       :headerbar         'true
-;; 	       :tabs              'default
-;; 	       :grid              'true
-;; 	       :popover           'default
-;; 	       :style             'default
-;; 	       :effect            'default
-;; 	       :image             'default
-;; 	       :label             'default
-;;         :webview           'default))
-
-;;; Hammer Time
-
-;; gjs-template-engine
-
-; The gjs-template-engine takes the template and list of options and
-; combines them with the selected template to create a gjs-app-script.
-; The selection of the template occurs when the user runs 
-; 'M-x create-gjs-app-script RET'
-
-(defun create-gjs-app-script ()
-  "Presents user with a list of template choices, then runs
-  gjs-template-engine with the template-selection as it's
-  argument."
+(defun request-template-name ()
+  "Request the name of the template from user."
   (interactive 
    (pop-buffer (template-choices) ;; the recursive minibuffer later
 			   (ask-user-for-template ()
@@ -328,66 +140,45 @@
 			   (kill-buffer (with-current-buffer)))
    (gjs-template-engine (template-selection nil))))
 
-(defun gjs-template-engine (template-selection app-template-buffer) 
+;;; gjs-template-engine
+;; The gjs-template-engine takes the template and list of options and
+;; combines them with the selected template to create a gjs-app-script.
+
+(defun select-app-skel (gjs-minibuffer-select)
+  "Select the app-skel."
+  (interactive minibuffer-select) app-skel-selection))
+
+(defun run-template-motor (app-skel-selection) 
   "Populate app-template-buffer with javascript code blocks
-  according to the struct of template-selection"
-  (evaluate-js-codeblocks-file ("./js-codeblocks.el"))
+  according to the scheme of app-skel-selection"
+  (create-app-template-buffer)
+  (switch-to-buffer (app-template-buffer))
+  (evaluate-js-codeblocks-file)
   (append-to-buffer (app-template-buffer)
 					(do-list 
 					 (for-each slot (template-selection)
 							    (print (slot-default)
-				               if :gtk-native
-                               if :
+									   if 'gtk
+									   if 'webkit
+
+(defun create-app-template-buffer ()
+  custom-buffer-create (app-template-buffer))
+
+;;; gjs-app-script
+;; gjs-app-script is javascript produced by run-template-motor. Opened
+;; in it's own buffer and the user can save, load, run or edit.
 
 ; make-indirect-buffer
 ; clone-indirect-buffer-other-window
 ; make-variable-buffer-local
-
-(defun select-app-template (*app-templates* gjs-minibuffer-select)
-  "Select the template from the list of structs in *gjs-app-templates*."
-  (interactive gjs-minibuffer-select) template-selection))
-
-(defun create-app-template-buffer ()
-  custom-buffer-create app-template-buffer)
-
-
-
-;(defun function-name (arguments...)
-;       "optional-documentation..."
-;       (interactive argument-passing-info)     ; optional
-;       body...)
-
 ; buffer-string
 ; buffer-substring
 ; buffer-substring-filters
 ; buffer-substring-no-properties
-
 ; filter-buffer-substring
 ; filter-buffer-substring-functions
-
-; ediff-merge-buffers
-
-; emerge-buffers
-; emerge-buffers-with-ancestor
 ; view-buffer-other-window
 ; highlight-compare-buffers
-
-; gjsImports
-; gjsApplicationName
-; gjsApplicationTitle
-; gjsHeaderBar
-; gjsTabs
-; gjsGrid
-; gjsPopover
-; gjsStyle
-; gjsEffect
-; gjsImage
-; gjsLabel
-; gjsWebview
-
-;; gjs-app-script
-; The gjs-app-script is javascript produced by gjs-template-engine. It
-; opens in it's own buffer and the user can save, load, run or edit.
 
 ; generate-new-buffer
 ; generate-new-buffer-name
@@ -402,22 +193,20 @@
 ; switch-to-buffer-other-window
 ; buffer-offer-save
 
-;; window scheme
-
-; A window scheme is necessary and customizable. Although there are
-; limitless ways of arranging windows, there are basically 2 main
-; types of window to support, each with it's preferred species of
-; buffer:
-;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
-;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
-; During the 'merge' operation, one of the windows can show an 'merge'
-; buffer that can be edited before the 'final' gjs-app-script buffer
-; is displayed in the top window. Ergo, the user can:
-;      1. Just work with a source file and a repl. 
-;      2. Generate a default gjs-app-script and use it with a repl. 
-;      3. 'Merge' a source file with a template, edit the 'merge', and use
-;         the product gjs-app-script with a repl.
-
+;;; window scheme
+;; A window scheme is necessary and customizable. Although there are
+;; limitless ways of arranging windows, there are basically 2 main
+;; types of window to support, each with it's preferred species of
+;; buffer:
+;;      1. top    :  source files | 'merge' buffer  |  gjs-app-script
+;;      2. bottom :  gjs-repl     | pop-up messages |  doc, etc
+;; During the 'merge' operation, one of the windows can show an 'merge'
+;; buffer that can be edited before the 'final' gjs-app-script buffer
+;; is displayed in the top window. Ergo, the user can:
+;;      1. Just work with a source file and a repl. 
+;;      2. Generate a default gjs-app-script and use it with a repl. 
+;;      3. 'Merge' a source file with a template, edit the 'merge', and use
+;;         the product gjs-app-script with a repl.
 ; ido-display-buffer
 ; ido-insert-buffer
 ; ido-read-buffer
@@ -437,15 +226,47 @@
 ; display-buffer-same-window
 ; pop-to-buffer
 
-;; minibuffer
+(provide 'gjs-mode)
 
-; A recursive minibuffer can be used to make selections of templates,
-; options, etc., thus reducing some of the window handling overhead.
+;;; Errata & TODO
+;; <bpalmer> xk05: needs more mario
+;;           (defstruct foo a b)
+;;           (foo-a (make-foo :a 3 :b 6)) => 3
+;;           (setf (foo-a o) 5)
+;; (defvar mario '(flaming-barrels hammers mushrooms turtles green-designers))
 
+;;; REPL
+;; Setting up, creating the gjs-repl window, and starting the gjs
+;; shell. These tasks are currently being performed by js-comint.
+; make-comint-in-buffer 
+; gjs-inferior-js-program
+; get-buffer
+; get-buffer-create
+; copy-to-buffer
+; process-adaptive-read-buffering
+; process-kill-buffer-query-function
+
+;;; Minibuffer
+;; A recursive minibuffer can be used to make selections of templates,
+;; options, etc., thus reducing some of the window handling overhead.
 ; window-minibuffer-p
 ; enable-recursive-minibuffers
 ; eval-minibuffer
 ; file-cache-minibuffer-complete
 ; exit-minibuffer
 
-(provide 'gjs-mode)
+;; Emacs keeps complaining about multiple constructors, I dunno why,
+;; but ok. The LT sez dog one is closed. Time to setf lam-mode and
+;; find another way off the friggin beach. swyaoywu.
+;;
+;; SWYAOYWU: Someday, When You Are Older, You Will Understand 
+;;
+;; (defstruct
+;;                 (person
+;;                  (:constructor nil)   ; no default constructor
+;;                  (:constructor new-person (name sex &optional (age 0)))
+;;                  (:constructor new-hound (&key (name "Rover")
+;;                                                (dog-years 0)
+;;                                           &aux (age (* 7 dog-years))
+;;                                                (sex 'canine))))
+;;                 name age sex)
