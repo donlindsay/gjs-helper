@@ -47,9 +47,11 @@
 
 (setq gjs-inferior-js-program "/usr/bin/gjs") 
 
-(setq gjs-js-codeblocks-file "./js-codeblocks.el")
+(setq js-blocks-file "./js-codeblocks.el")
 
-(setq js-codeblocks-index nil)
+(setq js-blocks-index nil)
+
+(setq app-skel-names '(gtk webkit library cinn unity))
 
 ;;; gjs-template-engine
 ;; The gjs-template-engine takes the template and list of options and
@@ -58,29 +60,29 @@
 (defun run-template-motor (app-skel-selection) 
   "Populate app-template-buffer with javascript code blocks
   according to the scheme of app-skel-selection"
-  (evaluate-js-codeblocks-file)
+  (evaluate-js-blocks-file)
   (create-app-template-buffer)
   (switch-to-buffer (app-template-buffer))
   (iterate-over (app-skel-selection) 
 				(for (each-slot) (app-skel-selection)
 					 (with-a-match-from 
-					  (js-codeblocks-file)
+					  (js-blocks-index)
 					  (append-to-buffer (app-template-buffer) 
-										(matching-codeblock))
+										(matching (js-block-js-block))
 					  ))))
 
 (defun create-app-template-buffer ()
-  "Create a new buffer to write the codeblocks to."
+  "Create a new buffer to write the js-blocks to."
   custom-buffer-create (app-template-buffer))
 
-(defun create-js-codeblocks-index (gjs-js-codeblocks-file)
-  "Read the list of js-codeblocks into a nested array for
+(defun create-js-blocks-index (js-blocks-file)
+  "Read the list of js-blocks into a nested array for
    matching against app-skel-selection slots."
   (load-file ()
 			 (do-once 
-			  (push js-codeblock-ident 
-					(app-skel-name (app-skel-slot))
-					(js-codeblocks-index)))))
+			  (push js-block-js-block-name 
+					(js-block-app-skel-name (js-block-app-skel-slot))
+					(js-blocks-index)))))
 
 ;;; Request information from user
 ;; Popup window, or minibuffer.
@@ -91,7 +93,7 @@
 			   (ask-user-for-template ()
 									  template-selection)
 			   (kill-buffer (with-current-buffer)))
-   (gjs-template-engine (template-selection nil))))
+   (run-template-motor (template-selection nil))))
 
 ;;; app-skel
 ;; The struct, app-skel, used to set options for the template
