@@ -22,11 +22,12 @@
 ;; General Public License for more details. (type 'C-h C-c')
 ;;
 ;; Description: A mode for working with gjs, a javascript shell with
-;; gtk+ bindings.
+;; gtk+ bindings, and an application template system for creating gjs
+;; applications. Intended to compliment js2-mode.
 ;;
 ;; Compatibility: Targeted for Emacs 24
 ;;
-;; Dependencies:  js2-mode js-comint gjs
+;; Dependencies:  gjs
 ;; 
 ;; Pause For The Cause: (defun function-name (arguments...)
 ;;                       "optional-documentation..."
@@ -34,28 +35,9 @@
 ;;                        body...)
 ;; Hammer Time:
 
-;(require 'js2-mode)
-;(require 'js-comint)
-
-;;; The gjs-repl-mode is based on js-comint repl.
-
-(define-derived-mode gjs-mode 
-  js-comint "*gjs-repl*"
-  "A mode for the gjs javascript shell\\{js-comint-map}"
-  (set (make-local-variable 'inferior-js-program-command)
-       gjs-inferior-js-program))
-
-(setq gjs-inferior-js-program "/usr/bin/gjs") 
-
-(setq js-blocks-file "./js-codeblocks.el")
-
-(setq js-blocks-index nil)
-
-(setq app-skel-names '(gtk webkit library cinn unity))
-
 ;;; REPL
 ;; Setting up, creating the gjs-repl window, and starting the gjs
-;; shell. These tasks are currently being performed by js-comint.
+;; shell.
 
 (require 'comint)
 
@@ -126,13 +108,29 @@
    `(,(concat "\\_<" (regexp-opt gjs-keywords) "\\_>") . font-lock-keyword-face))
   "Additional expressions to highlight in `gjs-mode'.")
 
-;;; gjs-template-engine
-;; The gjs-template-engine takes the template and list of options and
-;; combines them with the selected template to create a gjs-app-script.
+;;; Template Engine
+;; The template engine takes an app-skel-selection and a list of js
+;; code blocks and selectively combines them to create a
+;; gjs-app-script.
+
+;; request info by window or, later, a minibuffer.
+(setq app-skel-names '(gtk webkit library cinn unity))
+
+(defun request-skel-name ()
+  "Request the name of the app-skel from user."
+  (interactive 
+   (pop-buffer (template-choices)
+			   (ask-user-for-template ()
+									  app-skel-selection)
+			   (kill-buffer (with-current-buffer)))
+   (run-template-motor (app-skel-selection nil))))
+
+(setq js-blocks-file "./js-codeblocks.el")
+
 (defun run-template-motor (app-skel-selection) 
   "Populate app-template-buffer with javascript code blocks
   according to the scheme of app-skel-selection"
-  (evaluate-js-blocks-file)
+  (create-js-blocks-index)  ; consider doing this independently if its slow
   (create-app-template-buffer)
   (switch-to-buffer (app-template-buffer))
   (iterate-over (app-skel-selection) 
@@ -147,6 +145,8 @@
   "Create a new buffer to write the js-blocks to."
   custom-buffer-create (app-template-buffer))
 
+(setq js-blocks-index nil)
+
 (defun create-js-blocks-index (js-blocks-file)
   "Read the list of js-blocks into a nested array for
    matching against app-skel-selection slots."
@@ -156,21 +156,8 @@
 					(js-block-app-skel-name (js-block-app-skel-slot))
 					(js-blocks-index)))))
 
-;;; Request information from user
-;; Popup window, or minibuffer.
-(defun request-template-name ()
-  "Request the name of the template from user."
-  (interactive 
-   (pop-buffer (template-choices) ;; the recursive minibuffer later
-			   (ask-user-for-template ()
-									  template-selection)
-			   (kill-buffer (with-current-buffer)))
-   (run-template-motor (template-selection nil))))
-
-;;; app-skel
-;; The struct, app-skel, used to set options for the template
-;; generator.  The basic templates are: 
-;; gtk, webkit, library, cinn(amon), and unity 
+;;; Skeleton Closet
+;; The struct, app-skel, used to set options for run-template-motor
 (defstruct app-skel
   (name) (imports) (headerbar) (popover) (grid) (webkit)
   (tabs) (label) (image) (style))
@@ -255,24 +242,6 @@
 ;;           (setf (foo-a o) 5)
 ;; (defvar mario '(flaming-barrels hammers mushrooms turtles green-designers))
 
-;comint-dynamic-complete-functions        ;	List of functions called to perform completion.
-;comint-input-filter-functions 	          ; Abnormal hook run before input is sent to the process.
-;comint-output-filter-functions 	      ; Functions to call after output is inserted into the buffer.
-;comint-preoutput-filter-functions 	      ; List of functions to call before inserting Comint output into the buffer.
-;comint-redirect-filter-functions 	      ; List of functions to call before inserting redirected process output.
-;comint-redirect-original-filter-function ; The process filter that was in place when redirection is started
-;comint-input-sender ; lets you alter the input string mid-stream.
-
-;; http://www.masteringemacs.org/articles/2013/07/31/comint-writing-command-interpreter/
-
-; make-comint-in-buffer 
-; gjs-inferior-js-program
-; get-buffer
-; get-buffer-create
-; copy-to-buffer
-; process-adaptive-read-buffering
-; process-kill-buffer-query-function
-
 ;;; Minibuffer
 ;; A recursive minibuffer can be used to make selections of templates,
 ;; options, etc., thus reducing some of the window handling overhead.
@@ -280,12 +249,6 @@
 ;(defun select-app-skel (gjs-minibuffer-select)
 ;  "Select the app-skel."
 ;  (interactive minibuffer-select) app-skel-selection))
-
-; window-minibuffer-p
-; enable-recursive-minibuffers
-; eval-minibuffer
-; file-cache-minibuffer-complete
-; exit-minibuffer
 
 ;;; Window scheme
 ;; A window scheme is necessary and customizable. Although there are
@@ -302,62 +265,6 @@
 ;;      3. 'Merge' a source file with a template, edit the 'merge', and use
 ;;         the product gjs-app-script with a repl.
 
-; ido-display-buffer
-; ido-insert-buffer
-; ido-read-buffer
-; ido-switch-buffer
-; ido-switch-buffer-other-window
-; pop-to-buffer-same-window
-; display-message-or-buffer
-; set-buffer
-; set-window-buffer
-; window-buffer
-; show-buffer
 
-; display-buffer
-; display-buffer-fallback-action
-; display-buffer-function
-; display-buffer-pop-up-window
-; display-buffer-same-window
-; pop-to-buffer
 
-; make-indirect-buffer
-; clone-indirect-buffer-other-window
-; make-variable-buffer-local
-; buffer-string
-; buffer-substring
-; buffer-substring-filters
-; buffer-substring-no-properties
-; filter-buffer-substring
-; filter-buffer-substring-functions
-; view-buffer-other-window
-; highlight-compare-buffers
-
-; generate-new-buffer
-; generate-new-buffer-name
-; bury-buffer
-; switch-to-buffer
-; with-current-buffer
-; pp-buffer
-; set-buffer-major-mode
-; checkdoc-current-buffer
-; executable-make-buffer-file-executable-if-script-p
-; revert-buffer
-; switch-to-buffer-other-window
-; buffer-offer-save
-
-;; Emacs keeps complaining about multiple constructors, I dunno why,
-;; but ok. The LT sez dog one is closed. Time to setf lam-mode and
-;; find another way off the friggin beach. swyaoywu.
-;;
-;; SWYAOYWU: Someday, When You Are Older, You Will Understand 
-;;
-;; (defstruct
-;;                 (person
-;;                  (:constructor nil)   ; no default constructor
-;;                  (:constructor new-person (name sex &optional (age 0)))
-;;                  (:constructor new-hound (&key (name "Rover")
-;;                                                (dog-years 0)
-;;                                           &aux (age (* 7 dog-years))
-;;                                                (sex 'canine))))
-;;                 name age sex)
+ 
