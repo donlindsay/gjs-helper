@@ -2,26 +2,21 @@ gjs-mode
 ========
 
 I like the idea of using Gnome's Gjs javascript shell for
-coding. js2-mode and js-comint provide a solid foundation for
-developing using gjs with emacs. My main concept, so far, is to learn
-from the better ideas of js-comint and add things like app templates
-and maybe even some of the Looking Glass stuff.
+coding. js2-mode provides a solid foundation for development using gjs
+with emacs. My main concept is to learn from the better ideas of
+js-comint and add things like app templates and maybe even some of the
+Looking Glass stuff.
 
-Note: gjs-mode is in no way ready for end users, yet.
+Note: gjs-mode is in no way ready for end users, yet
 
 Note: new preliminary code does not require js-comint.el
 
-Dependencies
-------------
+Suggested
+---------
 
 js2-mode:   https://github.com/mooz/js2-mode?source=c
             
-js-comint:  http://sourceforge.net/projects/js-comint-el/?source=directory
-(see Note above)
-
-Note: Both js2-mode and js-comint are installable by emacs M-x
-      list-packages RET after adding the marmalade repo from
-      http://marmalade-repo.org (melpa for js-comint)
+Note: js2-mode is installable from GNU Elpa M-x list-packages RET
 
 And, of course, Gjs. Gjs exists in the Debian and Ubuntu repositories
 as 'gjs' and can be installed with: 'sudo apt-get install gjs' Arch
