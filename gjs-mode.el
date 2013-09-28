@@ -53,10 +53,82 @@
 
 (setq app-skel-names '(gtk webkit library cinn unity))
 
+;;; REPL
+;; Setting up, creating the gjs-repl window, and starting the gjs
+;; shell. These tasks are currently being performed by js-comint.
+
+(require 'comint)
+
+(defvar gjs-file-path "/usr/bin/gjs"
+  "Path to the program used by `run-gjs'")
+ 
+(defvar gjs-arguments '()
+  "Commandline arguments to pass to `gjs'")
+ 
+(defvar gjs-mode-map
+   (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
+     ;; example definition
+     (define-key map "\t" 'completion-at-point)
+     map)
+   "Basic mode map for `run-gjs'")
+ 
+(defvar gjs-prompt-regexp "^gjs>$"
+   "Prompt for `run-gjs'.")
+
+(defun run-gjs ()
+  "Run an inferior instance of `gjs' inside Emacs."
+  (interactive)
+  (let* ((gjs-program gjs-file-path)
+         (buffer (comint-check-proc "gjs")))
+    ;; pop to the "*gjs*" buffer if the process is dead, the
+    ;; buffer is missing or it's got the wrong mode.
+    (pop-to-buffer
+     (if (or buffer (not (derived-mode-p 'gjs-mode))
+             (comint-check-proc (current-buffer)))
+         (get-buffer-create (or buffer "*gjs*"))
+       (current-buffer)))
+    ;; create the comint process if there is no buffer.
+    (unless buffer
+      (apply 'make-comint-in-buffer "gjs" buffer
+             gjs-program gjs-arguments)
+      (gjs-mode))))
+
+(defun gjs--initialize ()
+  "Helper function to initialize gjs"
+  (setq comint-process-echoes t)
+  (setq comint-use-prompt-regexp t))
+ 
+(define-derived-mode gjs-mode comint-mode "gjs"
+  "Major mode for `run-gjs'.
+ 
+\\<gjs-mode-map>"
+  nil "gjs"
+  ;; this sets up the prompt so it matches things like: [foo@bar]
+  (setq comint-prompt-regexp gjs-prompt-regexp)
+  ;; this makes it read only; a contentious subject as some prefer the
+  ;; buffer to be overwritable.
+;  (setq comint-prompt-read-only t)
+  ;; this makes it so commands like M-{ and M-} work.
+  (set (make-local-variable 'paragraph-separate) "\\'")
+  (set (make-local-variable 'font-lock-defaults) '(gjs-font-lock-keywords t))
+  (set (make-local-variable 'paragraph-start) gjs-prompt-regexp))
+ 
+(add-hook 'gjs-mode-hook 'gjs--initialize)
+
+(set (make-local-variable 'font-lock-defaults) '(gjs-font-lock-keywords t))
+
+(defconst gjs-keywords
+  '())
+ 
+(defvar gjs-font-lock-keywords
+  (list
+   ;; highlight all the reserved commands.
+   `(,(concat "\\_<" (regexp-opt gjs-keywords) "\\_>") . font-lock-keyword-face))
+  "Additional expressions to highlight in `gjs-mode'.")
+
 ;;; gjs-template-engine
 ;; The gjs-template-engine takes the template and list of options and
 ;; combines them with the selected template to create a gjs-app-script.
-
 (defun run-template-motor (app-skel-selection) 
   "Populate app-template-buffer with javascript code blocks
   according to the scheme of app-skel-selection"
@@ -69,7 +141,7 @@
 					  (js-blocks-index)
 					  (append-to-buffer (app-template-buffer) 
 										(matching (js-block-js-block))
-					  ))))
+					  )))))
 
 (defun create-app-template-buffer ()
   "Create a new buffer to write the js-blocks to."
@@ -99,7 +171,6 @@
 ;; The struct, app-skel, used to set options for the template
 ;; generator.  The basic templates are: 
 ;; gtk, webkit, library, cinn(amon), and unity 
-
 (defstruct app-skel
   (name) (imports) (headerbar) (popover) (grid) (webkit)
   (tabs) (label) (image) (style))
@@ -184,9 +255,15 @@
 ;;           (setf (foo-a o) 5)
 ;; (defvar mario '(flaming-barrels hammers mushrooms turtles green-designers))
 
-;;; REPL
-;; Setting up, creating the gjs-repl window, and starting the gjs
-;; shell. These tasks are currently being performed by js-comint.
+;comint-dynamic-complete-functions        ;	List of functions called to perform completion.
+;comint-input-filter-functions 	          ; Abnormal hook run before input is sent to the process.
+;comint-output-filter-functions 	      ; Functions to call after output is inserted into the buffer.
+;comint-preoutput-filter-functions 	      ; List of functions to call before inserting Comint output into the buffer.
+;comint-redirect-filter-functions 	      ; List of functions to call before inserting redirected process output.
+;comint-redirect-original-filter-function ; The process filter that was in place when redirection is started
+;comint-input-sender ; lets you alter the input string mid-stream.
+
+;; http://www.masteringemacs.org/articles/2013/07/31/comint-writing-command-interpreter/
 
 ; make-comint-in-buffer 
 ; gjs-inferior-js-program
@@ -224,7 +301,6 @@
 ;;      2. Generate a default gjs-app-script and use it with a repl. 
 ;;      3. 'Merge' a source file with a template, edit the 'merge', and use
 ;;         the product gjs-app-script with a repl.
-
 
 ; ido-display-buffer
 ; ido-insert-buffer

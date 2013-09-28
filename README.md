@@ -9,12 +9,15 @@ and maybe even some of the Looking Glass stuff.
 
 Note: gjs-mode is in no way ready for end users, yet.
 
+Note: new preliminary code does not require js-comint.el
+
 Dependencies
 ------------
 
 js2-mode:   https://github.com/mooz/js2-mode?source=c
             
 js-comint:  http://sourceforge.net/projects/js-comint-el/?source=directory
+(see Note above)
 
 Note: Both js2-mode and js-comint are installable by emacs M-x
       list-packages RET after adding the marmalade repo from

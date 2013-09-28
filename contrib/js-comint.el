@@ -186,7 +186,8 @@ With argument, position cursor at end of buffer."
     m))
 
 ;;;###autoload
-(define-derived-mode inferior-js-mode comint-mode "Inferior Javascript"
+(define-derived-mode inferior-js-mode 
+  comint-mode "Inferior Javascript"
   "Major mode for interacting with an inferior javascript process.
 
 The following commands are available:
@@ -194,13 +195,13 @@ The following commands are available:
 
 A javascript process can be fired up with M-x run-js.
 
-Customization: Entry to this mode runs the hooks on comint-mode-hook and
-inferior-js-mode-hook (in that order).
+Customization: Entry to this mode runs the hooks on
+comint-mode-hook and inferior-js-mode-hook (in that order).
 
-You can send text to the inferior Javascript process from othber buffers containing
-Javascript source.
-    switch-to-js switches the current buffer to the Javascript process buffer.
-    js-send-region sends the current region to the Javascript process.
+You can send text to the inferior Javascript process from other
+buffers containing Javascript source.  switch-to-js switches the
+current buffer to the Javascript process buffer.  js-send-region
+sends the current region to the Javascript process.
 
 
 "
