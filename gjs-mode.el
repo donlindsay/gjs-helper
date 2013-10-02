@@ -133,6 +133,16 @@
   (create-js-blocks-index)  ; consider doing this independently if its slow
   (create-app-template-buffer)
   (switch-to-buffer (app-template-buffer))
+;; (setq num 0)
+;;                => 0
+;;           (while (< num 4)
+;;             (princ (format "Iteration %d." num))
+;;             (setq num (1+ num)))
+;;                -| Iteration 0.
+;;                -| Iteration 1.
+;;                -| Iteration 2.
+;;                -| Iteration 3.
+;;                => nil  
   (iterate-over (app-skel-selection) 
 				(for (each-slot) (app-skel-selection)
 					 (with-a-match-from 
