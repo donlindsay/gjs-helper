@@ -113,10 +113,15 @@
 ;; code blocks and selectively combines them to create a
 ;; gjs-app-script.
 
-;; request info by window or, later, a minibuffer.
 (setq app-skel-names '(gtk webkit library cinn unity))
 
-(defun request-skel-name ()
+(defun create-gjs-template (current-buffer)
+  "Interactive function to get a template name from the user and
+  run the template motor."
+  (interactive "P\nbTemplate name: ")
+  (request-skel-name))
+
+(defun request-skel-name (app-skel-names)
   "Request the name of the app-skel from user."
   (interactive 
    (pop-buffer (template-choices)
@@ -133,16 +138,25 @@
   (create-js-blocks-index)  ; consider doing this independently if its slow
   (create-app-template-buffer)
   (switch-to-buffer (app-template-buffer))
-;; (setq num 0)
-;;                => 0
-;;           (while (< num 4)
-;;             (princ (format "Iteration %d." num))
-;;             (setq num (1+ num)))
-;;                -| Iteration 0.
-;;                -| Iteration 1.
-;;                -| Iteration 2.
-;;                -| Iteration 3.
-;;                => nil  
+  (setq num 0)
+  => 0
+  (while (< num 4)
+	(princ (format "Iteration %d." num))
+	(setq num (1+ num)))
+  -| Iteration 0.
+  -| Iteration 1.
+  -| Iteration 2.
+  -| Iteration 3.
+  => nil  
+  (while (progn
+		   (forward-line 1)
+		   (not (looking-at "^$"))))
+  (defun reverse (list)
+	(let (value)
+	  (dolist (elt list value)
+		(setq value (cons elt value)))))
+  (dotimes (i 100)
+	(insert "I will not obey absurd orders\n"))
   (iterate-over (app-skel-selection) 
 				(for (each-slot) (app-skel-selection)
 					 (with-a-match-from 
@@ -160,6 +174,7 @@
 (defun create-js-blocks-index (js-blocks-file)
   "Read the list of js-blocks into a nested array for
    matching against app-skel-selection slots."
+  (interactive)
   (load-file ()
 			 (do-once 
 			  (push js-block-js-block-name 

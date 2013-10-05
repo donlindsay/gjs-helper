@@ -48,7 +48,8 @@ const CINNAMON_SYSTEM_CA_FILE = '/etc/ssl/certs/ca-certificates.crt';
    )
    :js-block-meta              'nil)
 
-
+;; I don't know if this block is generic enough for this file, perhaps
+;; it can go in an ancilliary js-codeblocks-extras file.
 (make-js-block
  :js-block-name                'cinn-search
  :app-skel-name                'cinn
