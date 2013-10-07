@@ -1,13 +1,12 @@
-; -*- Mode: emacs-lisp; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- 
 ;;; gjs-mode.el --- A gjs mode for working with gjs and gtk+ templates.
-;;;
+;;
 ;;; Copyright (C) 2013 Donald Lindsay
-;;;     
+;;     
 ;;; Author:           Donald Lindsay <don.lindsay@gmail.com>
 ;;; Maintainer:       Donald Lindsay <don.lindsay@gmail.com>
 ;;; Created:          21 September 2013
 ;;; Version:          0.0.1
-;;; Package-Requires: (js2-mode, js-comint, gjs)
+;;; Package-Requires: 
 ;;; Keywords:         javascript, inferior-mode, gtk+, gjs
 ;;
 ;; This file is *not* part of GNU Emacs
@@ -21,19 +20,19 @@
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 ;; General Public License for more details. (type 'C-h C-c')
 ;;
-;; Description: A mode for working with gjs, a javascript shell with
-;; gtk+ bindings, and an application template system for creating gjs
-;; applications. Intended to compliment js2-mode.
+;;; Description: A mode for working with gjs, a javascript shell with
+;;  gtk+ bindings, and an application template system for creating gjs
+;;  applications. Intended to compliment js2-mode.
 ;;
-;; Compatibility: Targeted for Emacs 24
+;;; Compatibility: Targeted for Emacs 24
 ;;
-;; Dependencies:  gjs
+;;; Dependencies:  gjs
 ;; 
-;; Pause For The Cause: (defun function-name (arguments...)
-;;                       "optional-documentation..."
-;;                       (interactive argument-passing-info) ; optional
-;;                        body...)
-;; Hammer Time:
+;;  Pause For The Cause: (defun function-name (arguments...)
+;;                        "optional-documentation..."
+;;                        (interactive argument-passing-info) ; optional
+;;                         body...)
+;;; Hammer Time:
 
 ;;; REPL
 ;; Setting up, creating the gjs-repl window, and starting the gjs
@@ -114,70 +113,50 @@
 ;; gjs-app-script.
 
 (setq app-skel-names '(gtk webkit library cinn unity))
+(setq js-blocks-file "./js-codeblocks.el")
+(setq js-blocks-extras-file "./js-codeblocks-extras.el")
 
 (defun create-gjs-template (current-buffer)
   "Interactive function to get a template name from the user and
   run the template motor."
-  (interactive "P\nbTemplate name: ")
-  (request-skel-name))
-
-(defun request-skel-name (app-skel-names)
-  "Request the name of the app-skel from user."
   (interactive 
-   (pop-buffer (template-choices)
-			   (ask-user-for-template ()
-									  app-skel-selection)
-			   (kill-buffer (with-current-buffer)))
-   (run-template-motor (app-skel-selection nil))))
+   (pop-to-buffer
+	(generate-new-buffer :name "Choose a template:")
+	(print (app-skel-names))
+	(recursive-minibuffer
+	 (minibuffer-completion-table (app-skel-names))
+	 (minibuffer-contents (app-skel-selection))
+	 (exit-minibuffer)
+	 (kill-buffer))
+	(run-template-motor (app-skel-selection))
+	))
 
-(setq js-blocks-file "./js-codeblocks.el")
-
-(defun run-template-motor (app-skel-selection) 
+(defun run-template-motor (app-skel-selection)
   "Populate app-template-buffer with javascript code blocks
   according to the scheme of app-skel-selection"
   (create-js-blocks-index)  ; consider doing this independently if its slow
   (create-app-template-buffer)
   (switch-to-buffer (app-template-buffer))
-  (setq num 0)
-  => 0
-  (while (< num 4)
-	(princ (format "Iteration %d." num))
-	(setq num (1+ num)))
-  -| Iteration 0.
-  -| Iteration 1.
-  -| Iteration 2.
-  -| Iteration 3.
-  => nil  
-  (while (progn
-		   (forward-line 1)
-		   (not (looking-at "^$"))))
-  (defun reverse (list)
-	(let (value)
-	  (dolist (elt list value)
-		(setq value (cons elt value)))))
-  (dotimes (i 100)
-	(insert "I will not obey absurd orders\n"))
-  (iterate-over (app-skel-selection) 
-				(for (each-slot) (app-skel-selection)
-					 (with-a-match-from 
+  (dolist (app-skel-selection(slot))
+				(for (app-skel-selection(slot))
+					 (with-a-match-from
 					  (js-blocks-index)
-					  (append-to-buffer (app-template-buffer) 
-										(matching (js-block-js-block))
+					  (append-to-buffer (app-template-buffer)
+										(matching (:js-block))
 					  )))))
 
 (defun create-app-template-buffer ()
   "Create a new buffer to write the js-blocks to."
-  custom-buffer-create (app-template-buffer))
-
-(setq js-blocks-index nil)
+  (custom-buffer-create-other-window '(gjs-app-script)))
 
 (defun create-js-blocks-index (js-blocks-file)
   "Read the list of js-blocks into a nested array for
    matching against app-skel-selection slots."
   (interactive)
+  (setq js-blocks-index nil)  
   (load-file ()
-			 (do-once 
-			  (push js-block-js-block-name 
+			 (do-once
+			  (push js-block-js-block-name
 					(js-block-app-skel-name (js-block-app-skel-slot))
 					(js-blocks-index)))))
 
@@ -197,7 +176,7 @@
 		(app-skel-webkit    (webkit-p))
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
-		(app-skel-image     'true) 
+		(app-skel-image     'true)
 		(app-skel-style     'true)
 		))
 
@@ -208,7 +187,7 @@
 		(app-skel-headerbar 'true)
 		(app-skel-popover   'false)
 		(app-skel-grid      'true)
-		(app-skel-webkit    'true)	
+		(app-skel-webkit    'true)
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
 		(app-skel-image     'true)
@@ -222,10 +201,10 @@
 		(app-skel-headerbar 'false)
 		(app-skel-popover   'false)
 		(app-skel-grid      'false)
-		(app-skel-webkit    'false)					  
+		(app-skel-webkit    'false)
 		(app-skel-tabs      'false)
 		(app-skel-label     'false)
-		(app-skel-image     'false)				  
+		(app-skel-image     'false)
 		(app-skel-style     'false)
 		))
   
@@ -236,10 +215,10 @@
 		(app-skel-headerbar 'true)
 		(app-skel-popover   'false)
 		(app-skel-grid      'true)
-		(app-skel-webkit    'false)					  
+		(app-skel-webkit    'false)
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
-		(app-skel-image     'true)				  
+		(app-skel-image     'true)
 		(app-skel-style     'true)
 		))
   
@@ -250,10 +229,10 @@
 		(app-skel-headerbar 'true)
 		(app-skel-popover   (popover-p))
 		(app-skel-grid      'true)
-		(app-skel-webkit    'false)					  
+		(app-skel-webkit    'false)
 		(app-skel-tabs      (tabs-p))
 		(app-skel-label     'true)
-		(app-skel-image     'true)				  
+		(app-skel-image     'true)
 		(app-skel-style     'true)
 		))
 
@@ -285,8 +264,8 @@
 ;; During the 'merge' operation, one of the windows can show an 'merge'
 ;; buffer that can be edited before the 'final' gjs-app-script buffer
 ;; is displayed in the top window. Ergo, the user can:
-;;      1. Just work with a source file and a repl. 
-;;      2. Generate a default gjs-app-script and use it with a repl. 
+;;      1. Just work with a source file and a repl.
+;;      2. Generate a default gjs-app-script and use it with a repl.
 ;;      3. 'Merge' a source file with a template, edit the 'merge', and use
 ;;         the product gjs-app-script with a repl.
 
@@ -328,3 +307,7 @@
 ;; use :-) )
 
  
+
+(provide 'gjs-mode)
+
+;;; gjs-mode.el ends here
