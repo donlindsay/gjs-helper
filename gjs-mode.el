@@ -107,43 +107,7 @@
    `(,(concat "\\_<" (regexp-opt gjs-keywords) "\\_>") . font-lock-keyword-face))
   "Additional expressions to highlight in `gjs-mode'.")
 
-;;; Template Engine
-;; The template engine takes an app-skel-selection and a list of js
-;; code blocks and selectively combines them to create a
-;; gjs-app-script.
 
-(setq app-skel-names '(gtk webkit library cinn unity))
-(setq js-blocks-file "./js-codeblocks.el")
-(setq js-blocks-extras-file "./js-codeblocks-extras.el")
-
-(defun create-gjs-template (current-buffer)
-  "Interactive function to get a template name from the user and
-  run the template motor."
-  (interactive 
-   (pop-to-buffer
-	(generate-new-buffer :name "Choose a template:")
-	(print (app-skel-names))
-	(recursive-minibuffer
-	 (minibuffer-completion-table (app-skel-names))
-	 (minibuffer-contents (app-skel-selection))
-	 (exit-minibuffer)
-	 (kill-buffer))
-	(run-template-motor (app-skel-selection))
-	))
-
-(defun run-template-motor (app-skel-selection)
-  "Populate app-template-buffer with javascript code blocks
-  according to the scheme of app-skel-selection"
-  (create-js-blocks-index)  ; consider doing this independently if its slow
-  (create-app-template-buffer)
-  (switch-to-buffer (app-template-buffer))
-  (dolist (app-skel-selection(slot))
-				(for (app-skel-selection(slot))
-					 (with-a-match-from
-					  (js-blocks-index)
-					  (append-to-buffer (app-template-buffer)
-										(matching (:js-block))
-					  )))))
 
 (defun create-app-template-buffer ()
   "Create a new buffer to write the js-blocks to."
@@ -160,85 +124,19 @@
 					(js-block-app-skel-name (js-block-app-skel-slot))
 					(js-blocks-index)))))
 
-;;; Skeleton Closet
-;; The struct, app-skel, used to set options for run-template-motor
-(defstruct app-skel
-  (name) (imports) (headerbar) (popover) (grid) (webkit)
-  (tabs) (label) (image) (style))
-  
-(defun create-gtk-skel (app-skel)
-  "Fill an app-skel struct with gtk app values."
-  (setf (app-skel-name      'gtk)
-		(app-skel-imports   'gtk)
-		(app-skel-headerbar (headerbar-p))
-		(app-skel-popover   (popover-p))
-		(app-skel-grid      (grid-p))
-		(app-skel-webkit    (webkit-p))
-		(app-skel-tabs      (tabs-p))
-		(app-skel-label     'true)
-		(app-skel-image     'true)
-		(app-skel-style     'true)
-		))
-
-(defun create-webkit-skel (app-skel)
-  "Fill an app-skel struct with webkit app values."
-  (setf (app-skel-name      'webkit)
-		(app-skel-imports   ('gtk 'webkit))
-		(app-skel-headerbar 'true)
-		(app-skel-popover   'false)
-		(app-skel-grid      'true)
-		(app-skel-webkit    'true)
-		(app-skel-tabs      (tabs-p))
-		(app-skel-label     'true)
-		(app-skel-image     'true)
-		(app-skel-style     'true)
-		))
-  
-(defun create-library-skel (app-skel)
-  "Fill an app-skel struct with library values."
-  (setf (app-skel-name      'library)
-		(app-skel-imports   'gtk)
-		(app-skel-headerbar 'false)
-		(app-skel-popover   'false)
-		(app-skel-grid      'false)
-		(app-skel-webkit    'false)
-		(app-skel-tabs      'false)
-		(app-skel-label     'false)
-		(app-skel-image     'false)
-		(app-skel-style     'false)
-		))
-  
-(defun create-cinn-skel (app-skel)
-  "Fill an app-skel struct with cinn values."
-  (setf (app-skel-name      'cinn)
-		(app-skel-imports   ('gtk 'cinn))
-		(app-skel-headerbar 'true)
-		(app-skel-popover   'false)
-		(app-skel-grid      'true)
-		(app-skel-webkit    'false)
-		(app-skel-tabs      (tabs-p))
-		(app-skel-label     'true)
-		(app-skel-image     'true)
-		(app-skel-style     'true)
-		))
-  
-(defun create-unity-skel (app-skel)
-  "Fill an app-skel struct with unity values."
-  (setf (app-skel-name      'unity)
-		(app-skel-imports   ('gtk 'unity))
-		(app-skel-headerbar 'true)
-		(app-skel-popover   (popover-p))
-		(app-skel-grid      'true)
-		(app-skel-webkit    'false)
-		(app-skel-tabs      (tabs-p))
-		(app-skel-label     'true)
-		(app-skel-image     'true)
-		(app-skel-style     'true)
-		))
 
 (provide 'gjs-mode)
 
 ;;; Errata & TODO
+
+;; Rewrite: So, it turns out that association lists are going to be
+;; the way to go for the templating system rather than structs. I
+;; talked this over with other developers in #emacs and it was
+;; suggested I might get better results this way. I've been kind of
+;; busy with other things lately which is why I havent been doing more
+;; updates. I'll be doing more designing this week. Also, I need to
+;; add the keybindings for sending buffers and blocks to the repl.
+
 
 ;; <bpalmer> xk05: needs more mario
 ;;           (defstruct foo a b)
@@ -306,8 +204,116 @@
 ;; suggested to me that this is what all the modern repl modes
 ;; use :-) )
 
- 
+;;; Skeleton Closet
+;; The struct, app-skel, used to set options for run-template-motor
+;; (defstruct app-skel
+;;  (name) (imports) (headerbar) (popover) (grid) (webkit)
+;;  (tabs) (label) (image) (style))
+  
+;; (defun create-gtk-skel (app-skel)
+;;   "Fill an app-skel struct with gtk app values."
+;;   (setf (app-skel-name      'gtk)
+;; 		(app-skel-imports   'gtk)
+;; 		(app-skel-headerbar (headerbar-p))
+;; 		(app-skel-popover   (popover-p))
+;; 		(app-skel-grid      (grid-p))
+;; 		(app-skel-webkit    (webkit-p))
+;; 		(app-skel-tabs      (tabs-p))
+;; 		(app-skel-label     'true)
+;; 		(app-skel-image     'true)
+;; 		(app-skel-style     'true)
+;; 		))
 
-(provide 'gjs-mode)
+;; (defun create-webkit-skel (app-skel)
+;;   "Fill an app-skel struct with webkit app values."
+;;   (setf (app-skel-name      'webkit)
+;; 		(app-skel-imports   ('gtk 'webkit))
+;; 		(app-skel-headerbar 'true)
+;; 		(app-skel-popover   'false)
+;; 		(app-skel-grid      'true)
+;; 		(app-skel-webkit    'true)
+;; 		(app-skel-tabs      (tabs-p))
+;; 		(app-skel-label     'true)
+;; 		(app-skel-image     'true)
+;; 		(app-skel-style     'true)
+;; 		))
+  
+;; (defun create-library-skel (app-skel)
+;;   "Fill an app-skel struct with library values."
+;;   (setf (app-skel-name      'library)
+;; 		(app-skel-imports   'gtk)
+;; 		(app-skel-headerbar 'false)
+;; 		(app-skel-popover   'false)
+;; 		(app-skel-grid      'false)
+;; 		(app-skel-webkit    'false)
+;; 		(app-skel-tabs      'false)
+;; 		(app-skel-label     'false)
+;; 		(app-skel-image     'false)
+;; 		(app-skel-style     'false)
+;; 		))
+  
+;; (defun create-cinn-skel (app-skel)
+;;   "Fill an app-skel struct with cinn values."
+;;   (setf (app-skel-name      'cinn)
+;; 		(app-skel-imports   ('gtk 'cinn))
+;; 		(app-skel-headerbar 'true)
+;; 		(app-skel-popover   'false)
+;; 		(app-skel-grid      'true)
+;; 		(app-skel-webkit    'false)
+;; 		(app-skel-tabs      (tabs-p))
+;; 		(app-skel-label     'true)
+;; 		(app-skel-image     'true)
+;; 		(app-skel-style     'true)
+;; 		))
+  
+;; (defun create-unity-skel (app-skel)
+;;   "Fill an app-skel struct with unity values."
+;;   (setf (app-skel-name      'unity)
+;; 		(app-skel-imports   ('gtk 'unity))
+;; 		(app-skel-headerbar 'true)
+;; 		(app-skel-popover   (popover-p))
+;; 		(app-skel-grid      'true)
+;; 		(app-skel-webkit    'false)
+;; 		(app-skel-tabs      (tabs-p))
+;; 		(app-skel-label     'true)
+;; 		(app-skel-image     'true)
+;; 		(app-skel-style     'true)
+;; 		))
 
-;;; gjs-mode.el ends here
+;;; Template Engine
+;; The template engine takes an app-skel-selection and a list of js
+;; code blocks and selectively combines them to create a
+;; gjs-app-script.
+
+;; (setq app-skel-names '(gtk webkit library cinn unity))
+;; (setq js-blocks-file "./js-codeblocks.el")
+;; (setq js-blocks-extras-file "./js-codeblocks-extras.el")
+
+;; (defun create-gjs-template (current-buffer)
+;;   "Interactive function to get a template name from the user and
+;;   run the template motor."
+;;   (interactive 
+;;    (pop-to-buffer
+;; 	(generate-new-buffer :name "Choose a template:")
+;; 	(print (app-skel-names))
+;; 	(recursive-minibuffer
+;; 	 (minibuffer-completion-table (app-skel-names))
+;; 	 (minibuffer-contents (app-skel-selection))
+;; 	 (exit-minibuffer)
+;; 	 (kill-buffer))
+;; 	(run-template-motor (app-skel-selection))
+;; 	))
+
+;; (defun run-template-motor (app-skel-selection)
+;;   "Populate app-template-buffer with javascript code blocks
+;;   according to the scheme of app-skel-selection"
+;;   (create-js-blocks-index)  ; consider doing this independently if its slow
+;;   (create-app-template-buffer)
+;;   (switch-to-buffer (app-template-buffer))
+;;   (dolist (app-skel-selection(slot))
+;; 				(for (app-skel-selection(slot))
+;; 					 (with-a-match-from
+;; 					  (js-blocks-index)
+;; 					  (append-to-buffer (app-template-buffer)
+;; 										(matching (:js-block))
+;; 					  )))))

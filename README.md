@@ -7,22 +7,34 @@ with emacs. My main concept is to learn from the better ideas of
 js-comint and add things like app templates and maybe even some of the
 Looking Glass stuff.
 
-Note: gjs-mode is in no way ready for end users, yet
+Notes: 
 
-Note: new preliminary code does not require js-comint.el
+* gjs-mode is in no way ready for end users, yet
+
+* Major rewrite: After discussing it with several more experienced
+  devs, I've decided that I'm going to redo the design of the template
+  system and use alists instead of structs. I've been sort of
+  distracted by other things lately and havent been doing much
+  coding. I will be doing more work on gjs-mode from this point.
+
+* New preliminary code does not require js-comint.el
 
 Suggested
 ---------
 
 js2-mode:   https://github.com/mooz/js2-mode?source=c
             
-Note: js2-mode is installable from GNU Elpa M-x list-packages RET
+js2-mode is installable from GNU Elpa M-x list-packages RET
 
-And, of course, Gjs. Gjs exists in the Debian and Ubuntu repositories
-as 'gjs' and can be installed with: 'sudo apt-get install gjs' Arch
-users can find Gjs in the 'Extra' repository as 'gjs'. If this doesn't
-cover it for you, check your distribution's repositories, or perhaps
-you can build Gjs from source.
+
+Required
+--------
+
+Gjs: Gjs exists in the Debian and Ubuntu repositories as 'gjs' and can
+     be installed with: 'sudo apt-get install gjs' Arch users can find
+     Gjs in the 'Extra' repository as 'gjs'. If this doesn't cover it
+     for you, check your distribution's repositories, or perhaps you
+     can build Gjs from source.
 
 Gjs Documentation and Tutorials
 -------------------------------
