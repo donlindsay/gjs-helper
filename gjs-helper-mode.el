@@ -1,4 +1,4 @@
-;;; gjs-mode.el --- A gjs mode for working with gjs and gtk+ templates.
+;;; gjs-helper-mode.el --- A gjs mode for working with gjs and gtk+ templates.
 ;;
 ;;; Copyright (C) 2013 Donald Lindsay
 ;;     
