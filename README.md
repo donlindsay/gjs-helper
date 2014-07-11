@@ -1,4 +1,4 @@
-gjs-mode
+gjs-helper-mode
 ========
 
 I like the idea of using Gnome's Gjs javascript shell for
@@ -9,15 +9,19 @@ Looking Glass stuff.
 
 Notes: 
 
-* gjs-mode is in no way ready for end users, yet
+* gjs-helper-mode is in no way ready for end users, yet
 
 * Major rewrite: After discussing it with several more experienced
   devs, I've decided that I'm going to redo the design of the template
   system and use alists instead of structs. I've been sort of
   distracted by other things lately and havent been doing much
-  coding. I will be doing more work on gjs-mode from this point.
+  coding.
 
 * New preliminary code does not require js-comint.el
+
+* Since I'm really not spending any time on this library, 
+  I've renamed it from gjs-mode to gjs-helper-mode so that 
+  gjs-mode is available.
 
 Suggested
 ---------
