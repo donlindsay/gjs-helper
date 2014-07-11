@@ -46,7 +46,7 @@
 (defvar gjs-arguments '()
   "Commandline arguments to pass to `gjs'")
  
-(defvar gjs-mode-map
+(defvar gjs-helper-mode-map
    (let ((map (nconc (make-sparse-keymap) comint-mode-map)))
      ;; example definition
      (define-key map "\t" 'completion-at-point)
@@ -82,7 +82,7 @@
 (define-derived-mode gjs-mode comint-mode "gjs"
   "Major mode for `run-gjs'.
  
-\\<gjs-mode-map>"
+\\<gjs-helper-mode-map>"
   nil "gjs"
   ;; this sets up the prompt so it matches things like: [foo@bar]
   (setq comint-prompt-regexp gjs-prompt-regexp)
@@ -125,7 +125,7 @@
 					(js-blocks-index)))))
 
 
-(provide 'gjs-mode)
+(provide 'gjs-helper-mode)
 
 ;;; Errata & TODO
 
